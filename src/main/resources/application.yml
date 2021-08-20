@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/blog_engine?&useSSL=false&serverTimezone=UTC
+    username: postgres
+    password: postgres
+    initialization-mode: always
+  liquibase:
+    change-log: classpath:db/changelog/databaseChangeLog-master.xml
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: username
+    password: password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+liquibase:
+  change-log: C:\Projects\BlogEngine\engine\engine\src\main\resources\db\changelog\databaseChangeLog-master.xml
+
+
+blog:
+  title: DevPub
+  subtitle: Рассказы разработчиков
+  phone: +7 903 664-44-55
+  email: ruslan@mail.ru
+  copyright: Ruslan Saberov
+  copyrightFrom: 2020
+
+upload:
+  path: C:\Users\rusa0621\Documents\Projects\Engine\blog_engine\src\main\resources\upload

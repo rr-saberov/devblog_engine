@@ -1,0 +1,116 @@
+package ru.spring.app.engine.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import ru.spring.app.engine.api.request.EditProfileRequest;
+import ru.spring.app.engine.api.request.SettingsRequest;
+import ru.spring.app.engine.api.response.CalendarResponse;
+import ru.spring.app.engine.api.response.EditProfileResponse;
+import ru.spring.app.engine.api.response.InitResponse;
+import ru.spring.app.engine.api.response.SettingsResponse;
+import ru.spring.app.engine.api.response.StatisticsResponse;
+import ru.spring.app.engine.exceptions.AccessIsDeniedException;
+import ru.spring.app.engine.service.ImageStorage;
+import ru.spring.app.engine.service.PostService;
+import ru.spring.app.engine.service.SettingsService;
+import ru.spring.app.engine.service.UserService;
+
+import java.io.IOException;
+import java.security.Principal;
+
+@RestController
+@RequestMapping("/api")
+@Tag(name = "api general controller")
+public class ApiGeneralController {
+
+    private static final Logger LOGGER = LogManager.getLogger(ApiGeneralController.class);
+    private final SettingsService settingsService;
+    private final PostService postService;
+    private final InitResponse initResponse;
+    private final ImageStorage storage;
+    private final UserService userService;
+
+    public ApiGeneralController(SettingsService settingsService, PostService postService,
+                                InitResponse initResponse, ImageStorage storage, UserService userService) {
+        this.settingsService = settingsService;
+        this.postService = postService;
+        this.initResponse = initResponse;
+        this.storage = storage;
+        this.userService = userService;
+    }
+
+    @GetMapping("/init")
+    @Operation(summary = "init method")
+    public ResponseEntity<InitResponse> init() {
+        return ResponseEntity.ok(initResponse);
+    }
+
+    @GetMapping("/settings")
+    @Operation(summary = "method to get settings")
+    public ResponseEntity<SettingsResponse> settings() {
+        return ResponseEntity.ok(settingsService.getGlobalSettings());
+    }
+
+    @PutMapping("/settings")
+    @Operation(summary = "method to change settings")
+    @PreAuthorize("hasAuthority('user:moderate')")
+    public ResponseEntity<Boolean> updateSettings(SettingsRequest request) {
+        LOGGER.info("try to change global settings");
+        return ResponseEntity.ok(settingsService.updateGlobalSettings(request));
+    }
+
+    @GetMapping("/calendar")
+    @Operation(summary = "method to get calendar")
+    public ResponseEntity<CalendarResponse> getPostCountInYear(@RequestParam(defaultValue = "0") Integer year) {
+        return ResponseEntity.ok(postService.getPostsCountInTheYear(year));
+    }
+
+    @PostMapping("/image")
+    @Operation(summary = "method to upload image")
+    @PreAuthorize("hasAuthority('user:write')")
+    public String saveImage(@RequestBody MultipartFile file) throws IOException {
+        LOGGER.info("try to upload image");
+        String savePath = storage.saveNewImage(file);
+        return (savePath);
+    }
+
+    @PostMapping("/profile/my")
+    @Operation(summary = "method to change profile")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<EditProfileResponse> editProfile(@RequestBody EditProfileRequest request, Principal principal) {
+        LOGGER.info("try to change user profile");
+        return ResponseEntity.ok(userService.editProfile(request, principal));
+    }
+
+    @GetMapping("/statistics/my")
+    @Operation(summary = "method to get users statistics")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<StatisticsResponse> getMyStatistics(Principal principal) {
+        return ResponseEntity.ok(postService.getUserStatistics(principal.getName()));
+    }
+
+    @GetMapping("/statistics/all")
+    @Operation(summary = "method to get all statistics")
+    @PreAuthorize("hasAuthority('user:moderate')")
+    public ResponseEntity<StatisticsResponse> getStatistics(Principal principal) throws AccessIsDeniedException {
+        if (userService.getUserByEmail(principal.getName()).getIsModerator() == 1 && settingsService.getGlobalSettings().isStatisticsIsPublic()) {
+            LOGGER.info("viewing statistics");
+            return ResponseEntity.ok(postService.getStatistics(principal.getName()));
+        } else {
+            LOGGER.error("viewing statistics, access is denied");
+            throw new AccessIsDeniedException("access to statistics is closed");
+        }
+    }
+}

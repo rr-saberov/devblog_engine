@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="14434343333" author="Ruslan">
+
+        <insert tableName="post_comments">
+            <column name="id" value="1"/>
+            <column name="parent_id" value="1"/>
+            <column name="post_id" value="1"/>
+            <column name="text" value="text"/>
+            <column name="time" value="2005-11-2 20:00:00"/>
+            <column name="user_id" value="1"/>
+        </insert>
+
+        <insert tableName="tags">
+            <column name="id" value="1"/>
+            <column name="name" value="tag name"/>
+        </insert>
+
+        <insert tableName="post_comments">
+            <column name="id" value="2"/>
+            <column name="parent_id" value="1"/>
+            <column name="post_id" value="1"/>
+            <column name="text" value="text"/>
+            <column name="time" value="2005-11-2 20:00:00"/>
+            <column name="user_id" value="2"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="code" value="dsadsa"/>
+            <column name="email" value="moderator@gmail.com"/>
+            <column name="is_moderator" value="1"/>
+            <column name="name" value="Maxim"/>
+            <column name="password" value="$2y$12$dqAZ.BhUp1RoMB26ddz/2umQpSGs0lXPSGT/tT9G1ebg4SYfcIDxu"/>
+            <column name="photo" value="fdsfsdfsd"/>
+            <column name="reg_time" value="2021-03-01 20:00:00"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="code" value="dsd"/>
+            <column name="email" value="mail@gmail.com"/>
+            <column name="is_moderator" value="0"/>
+            <column name="name" value="Lada"/>
+            <column name="password" value="$2y$12$dqAZ.BhUp1RoMB26ddz/2umQpSGs0lXPSGT/tT9G1ebg4SYfcIDxu"/>
+            <column name="photo" value="test_photo"/>
+            <column name="reg_time" value="2021-02-01 20:00:00"/>
+        </insert>
+
+        <insert tableName="captcha_codes">
+            <column name="code" value="dsadsadsad"/>
+            <column name="secret_code" value="fdsafdsa45%%%"/>
+            <column name="time" value="2005-10-09 20:00:00"/>
+        </insert>
+
+        <insert tableName="post_votes">
+            <column name="post_id" value="1"/>
+            <column name="time" value="2011-10-09 20:00:00"/>
+            <column name="user_id" value="1"/>
+            <column name="value" value="1"/>
+        </insert>
+
+        <insert tableName="posts">
+            <column name="is_active" value="1"/>
+            <column name="moderation_status" value="ACCEPTED"/>
+            <column name="time" value="2005-10-09 20:00:00"/>
+            <column name="text" value="test_text"/>
+            <column name="view_count" value="55"/>
+            <column name="user_id" value="1"/>
+            <column name="view_count" value="2"/>
+            <column name="moderator_id" value="1"/>
+        </insert>
+
+        <insert tableName="tag2post">
+            <column name="id" value="1"/>
+            <column name="post_id" value="1"/>
+            <column name="tag_id" value="1"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
