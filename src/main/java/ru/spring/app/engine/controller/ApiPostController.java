@@ -21,13 +21,12 @@ import ru.spring.app.engine.api.response.AddCommentResponse;
 import ru.spring.app.engine.api.response.AddPostResponse;
 import ru.spring.app.engine.api.response.CurrentPostResponse;
 import ru.spring.app.engine.api.response.PostsResponse;
-import ru.spring.app.engine.exceptions.AddCommentFailException;
 import ru.spring.app.engine.exceptions.PostNotFoundException;
 import ru.spring.app.engine.service.CommentService;
 import ru.spring.app.engine.service.PostService;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api")
@@ -47,7 +46,7 @@ public class ApiPostController {
     @Operation(summary = "method to get all posts")
     public ResponseEntity<PostsResponse> getPosts(
             @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "30") Integer limit,
             @RequestParam(defaultValue = "recent") String mode) {
         return ResponseEntity.ok(postService.getPosts(offset, limit, mode));
     }
@@ -67,7 +66,7 @@ public class ApiPostController {
             @RequestParam(defaultValue = "0") Integer offset,
             @RequestParam(defaultValue = "5") Integer limit,
             @RequestParam(defaultValue = "2005-10-9")
-            @DateTimeFormat(pattern="yyyy-MM-dd") LocalDateTime date) {
+            @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate date) {
         return ResponseEntity.ok(postService.getPostsOnDay(offset, limit, date));
     }
 
@@ -135,12 +134,8 @@ public class ApiPostController {
     @PostMapping("/comment")
     @Operation(summary = "method to add comment")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<AddCommentResponse> addComment(@RequestBody CommentRequest comment, Principal principal) throws AddCommentFailException {
-        if (!commentsService.addComment(comment, principal.getName()).isResult()) {
-            LOGGER.error("unsuccessful attempt to add a comment");
-            throw new AddCommentFailException("fail");
-        }
-        LOGGER.info("add comment successful");
+    public ResponseEntity<AddCommentResponse> addComment(@RequestBody CommentRequest comment, Principal principal) {
+        LOGGER.info("try to add comment");
         return ResponseEntity.ok(commentsService.addComment(comment, principal.getName()));
     }
 

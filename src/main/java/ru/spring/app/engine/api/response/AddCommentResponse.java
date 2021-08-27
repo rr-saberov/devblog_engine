@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class  AddCommentResponse {
+public class AddCommentResponse {
     private long id;
     private boolean result;
     private List<AddCommentError> errors;

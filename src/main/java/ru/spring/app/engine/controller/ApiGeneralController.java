@@ -105,12 +105,7 @@ public class ApiGeneralController {
     @Operation(summary = "method to get all statistics")
     @PreAuthorize("hasAuthority('user:moderate')")
     public ResponseEntity<StatisticsResponse> getStatistics(Principal principal) throws AccessIsDeniedException {
-        if (userService.getUserByEmail(principal.getName()).getIsModerator() == 1 && settingsService.getGlobalSettings().isStatisticsIsPublic()) {
-            LOGGER.info("viewing statistics");
+            LOGGER.info("try to view statistics");
             return ResponseEntity.ok(postService.getStatistics(principal.getName()));
-        } else {
-            LOGGER.error("viewing statistics, access is denied");
-            throw new AccessIsDeniedException("access to statistics is closed");
-        }
     }
 }

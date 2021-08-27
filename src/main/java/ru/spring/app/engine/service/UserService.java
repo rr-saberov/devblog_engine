@@ -23,10 +23,6 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).get();
-    }
-
     public EditProfileResponse editProfile(EditProfileRequest request, Principal principal) {
         EditProfileResponse response = new EditProfileResponse();
         User currentUser = userRepository.findByEmail(principal.getName()).get();

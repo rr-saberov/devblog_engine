@@ -3,6 +3,7 @@ package ru.spring.app.engine.service;
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.response.SingleTagResponse;
 import ru.spring.app.engine.api.response.TagsResponse;
+import ru.spring.app.engine.entity.Tag;
 import ru.spring.app.engine.repository.TagRepository;
 
 import java.util.ArrayList;
@@ -20,23 +21,29 @@ public class TagService {
     }
 
     public TagsResponse getTags(String query) {
-        List<SingleTagResponse> singleTagResponses = new ArrayList<>();
-        tagRepository.getTagsOrderByPopularity().forEach(tags -> {
-                SingleTagResponse tagResponse = new SingleTagResponse();
-                if (tags.getName().startsWith(query)) {
-                    tagResponse.setName(tags.getName());
-                    tagResponse.setWeight(getTagWeight(tags.getName()));
-                }
-                singleTagResponses.add(tagResponse);
-            });
-        List<SingleTagResponse> responses = singleTagResponses.stream()
+        return new TagsResponse(getSingleTagsResponses(query).stream()
                 .sorted(Comparator.comparing(SingleTagResponse::getWeight).reversed())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+    }
 
-        return new TagsResponse(responses);
+    private List<SingleTagResponse> getSingleTagsResponses(String query) {
+        List<SingleTagResponse> singleTagResponses = new ArrayList<>();
+        tagRepository.getTagsOrderByPopularity().forEach(tag -> {
+            SingleTagResponse tagResponse = new SingleTagResponse();
+            if (tag.getName().startsWith(query) && !singleTagResponses.contains(tag)) {
+                tagResponse.setName(tag.getName());
+                tagResponse.setWeight(getTagWeight(tag.getName()));
+            }
+            singleTagResponses.add(tagResponse);
+        });
+        return singleTagResponses;
     }
 
     private Double getTagWeight(String tagName) {
-        return (double) tagRepository.getPostsCountWithTag(tagName) / tagRepository.getPostsCount() * 5;
+        Tag mostPopularTag = tagRepository.getTagsOrderByPopularity().get(0);
+        long postsCount = tagRepository.getPostsCount();
+        double coefficient = 1 /
+                ((double) tagRepository.getPostsCountWithTag(mostPopularTag.getName()) / (double) postsCount);
+        return ((double) tagRepository.getPostsCountWithTag(tagName) / postsCount * coefficient);
     }
 }
