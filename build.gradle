@@ -8,12 +8,6 @@ group = 'ru.spring.app.engine'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '16'
 
-//configurations {
-//    compileOnly {
-//        extendsFrom annotationProcessor
-//    }
-//}
-
 repositories {
     mavenCentral()
 }
@@ -24,43 +18,24 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf:2.5.3'
     implementation 'org.springframework.boot:spring-boot-starter-mail:2.5.3'
-// https://mvnrepository.com/artifact/org.liquibase/liquibase-core
+    implementation 'org.springframework.boot:spring-boot-starter-parent:2.5.4'
     implementation 'org.liquibase:liquibase-core:4.4.3'
-
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.liquibase:liquibase-gradle-plugin:2.0.1'
-
-    implementation group: 'com.github.cage', name: 'cage', version: '1.0'
-    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
-    implementation 'io.swagger:swagger-core:2.0.0-rc2'
-    implementation 'io.springfox:springfox-boot-starter:3.0.0'
     implementation 'io.swagger.core.v3:swagger-annotations:2.1.10'
-
+    implementation 'io.springfox:springfox-swagger2:2.10.0'
+    implementation 'io.springfox:springfox-swagger-ui:2.10.5'
+    implementation 'org.liquibase:liquibase-gradle-plugin:2.0.1'
+    implementation group: 'com.github.cage', name: 'cage', version: '1.0'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'org.postgresql:postgresql:42.2.23'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-
 }
-
-//liquibase {
-//    activities {
-//        main {
-//            File propsFile = new File("src/main/resources/liquibase.properties")
-//            Properties properties = new Properties()
-//            properties.load(new FileInputStream(propsFile))
-//            changeLogFile 'src/main/resources/db/changelog/databaseChangeLog-master.xml'
-//           url "${dbUrl}"
-//           username "${dbUsername}"
-//           password "${dbPassword}"
-//        }
-//    }
-//    runList = 'main'
-//}
 
 test {
     useJUnitPlatform()

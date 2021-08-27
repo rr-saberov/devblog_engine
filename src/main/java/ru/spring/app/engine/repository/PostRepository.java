@@ -12,9 +12,7 @@ import ru.spring.app.engine.entity.PostComments;
 import ru.spring.app.engine.entity.PostVotes;
 
 import javax.transaction.Transactional;
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +28,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
             "AND p.time = :postDate " +
             "ORDER BY p.time DESC")
-    Page<Post> getPostsPerDay(@Param("postDate") LocalDateTime postDate, Pageable pageable);
+    Page<Post> getPostsPerDay(@Param("postDate") LocalDate postDate, Pageable pageable);
 
     @Query("SELECT p " +
             "FROM Post p " +

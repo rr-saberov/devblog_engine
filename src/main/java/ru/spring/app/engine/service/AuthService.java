@@ -25,6 +25,7 @@ import ru.spring.app.engine.repository.CaptchaRepository;
 import ru.spring.app.engine.repository.GlobalSettingsRepository;
 import ru.spring.app.engine.repository.UserRepository;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +41,8 @@ public class AuthService {
     private final EmailService emailService;
 
     public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager,
-                       CaptchaRepository captchaRepository, PasswordEncoder passwordEncoder, GlobalSettingsRepository globalSettingsRepository, EmailService emailService) {
+                       CaptchaRepository captchaRepository, PasswordEncoder passwordEncoder,
+                       GlobalSettingsRepository globalSettingsRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.captchaRepository = captchaRepository;
         this.authenticationManager = authenticationManager;
@@ -57,8 +59,8 @@ public class AuthService {
         return convertToResponse(user.getUsername());
     }
 
-    public AuthResponse check(String name) {
-        return convertToResponse(name);
+    public AuthResponse check(Principal principal) {
+        return principal != null ? convertToResponse(principal.getName()) : new AuthResponse(false);
     }
 
     public RegistrationResponse registration(RegistrationRequest request) throws RegistrationFailedException {

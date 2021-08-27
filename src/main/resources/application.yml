@@ -25,8 +25,7 @@ spring:
           starttls:
             enable: true
 liquibase:
-  change-log: C:\Projects\BlogEngine\engine\engine\src\main\resources\db\changelog\databaseChangeLog-master.xml
-
+  change-log: classpath:db/changelog/databaseChangeLog-master.xml
 
 blog:
   title: DevPub
@@ -37,4 +36,4 @@ blog:
   copyrightFrom: 2020
 
 upload:
-  path: C:\Users\rusa0621\Documents\Projects\Engine\blog_engine\src\main\resources\upload
+  path: C:\Projects\BackendBlog\devblog_engine\src\main\resources\upload

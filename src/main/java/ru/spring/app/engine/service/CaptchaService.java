@@ -33,13 +33,9 @@ public class CaptchaService {
         return new CaptchaResponse(secretCode, encodedString);
     }
 
-    public boolean validCaptcha(String secretCode, String currentCaptcha) {
-        if (captchaRepository.findBySecretCode(secretCode).isPresent()) {
-            Captcha captcha = captchaRepository.findBySecretCode(secretCode).get();
-            return captcha.getCode().equals(currentCaptcha);
-        } else {
-            return false;
-        }
+    public Boolean validCaptcha(String secretCode, String currentCaptcha) {
+        return captchaRepository.findBySecretCode(secretCode).isPresent()
+                && captchaRepository.findBySecretCode(secretCode).get().getCode().equals(currentCaptcha);
     }
 
     private void restoreOldCaptcha() {

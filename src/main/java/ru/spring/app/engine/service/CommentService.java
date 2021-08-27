@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -31,17 +30,28 @@ public class CommentService {
     }
 
     public AddCommentResponse addComment(CommentRequest comment, String email) {
-        AddCommentResponse response = new AddCommentResponse();
-        if (commentsRepository.findById(comment.getParentId()).isPresent()
-                || postRepository.findById(comment.getPostId()).isPresent()) {
-            commentsRepository.save(convertRequestToPostComments(comment, email));
-            response.setId(new Random().nextLong());
-            response.setResult(true);
-        } else {
-            response.setResult(false);
-            response.setErrors(addErrorsToList(comment));
+        if (!addErrorsToList(comment).isEmpty()) {
+            return createResponseWithErrors(comment);
         }
+        commentsRepository.save(convertRequestToPostComments(comment, email));
+        AddCommentResponse response = new AddCommentResponse();
+        response.setId(new Random().nextLong());
+        response.setResult(true);
         return response;
+    }
+
+    private List<AddCommentError> addErrorsToList(CommentRequest comment) {
+        List<AddCommentError> errors = new ArrayList<>();
+        if (comment.getPostId() == 0 && commentsRepository.findById(comment.getParentId()).isEmpty()) {
+            errors.add(new AddCommentError("add fail, no comment with such id"));
+        }
+        if (postRepository.findById(comment.getPostId()).isEmpty()) {
+            errors.add(new AddCommentError("add fail, no post with such id"));
+        }
+        if (comment.getText().length() <= 10) {
+            errors.add(new AddCommentError("add fail, the text is too short"));
+        }
+        return errors;
     }
 
     private PostComments convertRequestToPostComments(CommentRequest comment, String email) {
@@ -55,17 +65,10 @@ public class CommentService {
         return postComments;
     }
 
-    private List<AddCommentError> addErrorsToList(CommentRequest comment) {
-        List<AddCommentError> errors = new ArrayList<>();
-        if (commentsRepository.findById(comment.getParentId()).isEmpty()) {
-            errors.add(new AddCommentError("add fail, no comment with such id"));
-        }
-        if (postRepository.findById(comment.getPostId()).isEmpty()) {
-            errors.add(new AddCommentError("add fail, no post with such id"));
-        }
-        if (comment.getText().length() <= 10) {
-            errors.add(new AddCommentError("add fail, the text is too short"));
-        }
-        return errors;
+    private AddCommentResponse createResponseWithErrors(CommentRequest commentRequest) {
+        AddCommentResponse response = new AddCommentResponse();
+        response.setResult(false);
+        response.setErrors(addErrorsToList(commentRequest));
+        return response;
     }
 }
