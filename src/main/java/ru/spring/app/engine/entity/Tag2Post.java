@@ -24,7 +24,7 @@ public class Tag2Post {
     private long id;
 
     @Column(name = "post_id", nullable = false)
-    private long postId;
+    private Long postId;
 
     @Column(name = "tag_id", nullable = false)
     private long tagId;

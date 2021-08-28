@@ -56,11 +56,7 @@ public class ApiAuthController {
     @Operation(summary = "method to check the current session")
     public ResponseEntity<AuthResponse> check(Principal principal) {
         LOGGER.info("checking the current user session");
-        if (principal != null) {
-            return ResponseEntity.ok(authService.check(principal.getName()));
-        } else {
-            return ResponseEntity.ok(new AuthResponse(false));
-        }
+        return ResponseEntity.ok(authService.check(principal));
     }
 
     @GetMapping("/captcha")
@@ -87,10 +83,10 @@ public class ApiAuthController {
             LOGGER.info("try to registration new user");
             return ResponseEntity.ok(authService.registration(request));
         } else {
-            LOGGER.info("user entered the wrong captcha");
+            LOGGER.error("user entered the wrong captcha");
             throw new RegistrationFailedException("wrong captcha");
         }
-  }
+    }
 
     @PostMapping("/restore")
     @Operation(summary = "method to restore password")

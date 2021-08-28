@@ -23,7 +23,6 @@ public class ImageStorage {
     String uploadPath;
 
     public String saveNewImage(MultipartFile file) throws IOException {
-
         String resourceURI = null;
         RandomString random = new RandomString(4);
         String path = uploadPath + "/" + random.nextString() + "/" + random.nextString();

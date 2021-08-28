@@ -5,7 +5,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.request.AddPostRequest;
-import ru.spring.app.engine.api.response.*;
+import ru.spring.app.engine.api.response.AddPostResponse;
+import ru.spring.app.engine.api.response.CalendarResponse;
+import ru.spring.app.engine.api.response.CommentResponse;
+import ru.spring.app.engine.api.response.CommentUserResponse;
+import ru.spring.app.engine.api.response.CurrentPostResponse;
+import ru.spring.app.engine.api.response.PostsResponse;
+import ru.spring.app.engine.api.response.SinglePostResponse;
+import ru.spring.app.engine.api.response.StatisticsResponse;
+import ru.spring.app.engine.api.response.UserResponse;
 import ru.spring.app.engine.api.response.errors.AddPostError;
 import ru.spring.app.engine.entity.Post;
 import ru.spring.app.engine.entity.Tag;
@@ -14,15 +22,26 @@ import ru.spring.app.engine.entity.User;
 import ru.spring.app.engine.entity.enums.ModerationStatus;
 import ru.spring.app.engine.exceptions.AccessIsDeniedException;
 import ru.spring.app.engine.exceptions.PostNotFoundException;
-import ru.spring.app.engine.repository.*;
+import ru.spring.app.engine.repository.PostRepository;
+import ru.spring.app.engine.repository.PostVotesRepository;
+import ru.spring.app.engine.repository.Tag2PostRepository;
+import ru.spring.app.engine.repository.TagRepository;
+import ru.spring.app.engine.repository.UserRepository;
 
 import java.security.Principal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,14 +52,17 @@ public class PostService {
     private final TagRepository tagRepository;
     private final PostVotesRepository postVotesRepository;
     private final Tag2PostRepository tag2PostRepository;
+    private final SettingsService settingsService;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository,TagRepository tagRepository,
-                       PostVotesRepository postVotesRepository, Tag2PostRepository tag2PostRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository,
+                       TagRepository tagRepository, PostVotesRepository postVotesRepository,
+                       Tag2PostRepository tag2PostRepository, SettingsService settingsService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.tagRepository = tagRepository;
         this.postVotesRepository = postVotesRepository;
         this.tag2PostRepository = tag2PostRepository;
+        this.settingsService = settingsService;
     }
 
     public PostsResponse getPosts(Integer offset, Integer limit, String mode) {
@@ -79,18 +101,17 @@ public class PostService {
     public PostsResponse getPostsByUserRequest(Integer offset, Integer limit, String query) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
         PostsResponse postsResponse = new PostsResponse();
-        Page<Post> postsPage =
-                postRepository.searchInText(query, nextPage);
+        Page<Post> postsPage = postRepository.searchInText(query, nextPage);
         postsResponse.setCount(postsPage.getTotalElements());
         postsResponse.setPosts(postsPage.get().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
         return postsResponse;
     }
 
-    public PostsResponse getPostsOnDay(Integer offset, Integer limit, LocalDateTime date) {
+    public PostsResponse getPostsOnDay(Integer offset, Integer limit, LocalDate date) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
         PostsResponse postsResponse = new PostsResponse();
         Page<Post> postsPage =
-                postRepository.getPostsPerDay(date, nextPage);
+                postRepository.getPostsPerDay(date.getDayOfMonth(), date.getMonthValue(), date.getYear(), nextPage);
         postsResponse.setCount(postsPage.getTotalElements());
         postsResponse.setPosts(postsPage.get().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
         return postsResponse;
@@ -99,21 +120,14 @@ public class PostService {
     public PostsResponse getPostsByTag(Integer offset, Integer limit, String tag) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
         PostsResponse postsResponse = new PostsResponse();
-        Page<Post> postsPage =
-                postRepository.getPostsWithTag(tag, nextPage);
+        Page<Post> postsPage = postRepository.getPostsWithTag(tag, nextPage);
         postsResponse.setCount(postsPage.getTotalElements());
         postsResponse.setPosts(postsPage.get().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
         return postsResponse;
     }
 
     public CalendarResponse getPostsCountInTheYear(Integer year) {
-        CalendarResponse calendarResponse;
-        if (year == 0) {
-            calendarResponse = convertMapToResponse();
-        } else {
-            calendarResponse = convertMapToResponse(year);
-        }
-        return calendarResponse;
+        return year == 0 ? convertMapToResponse() : convertMapToResponse(year);
     }
 
     public CurrentPostResponse getPostById(Long id) throws PostNotFoundException {
@@ -151,7 +165,7 @@ public class PostService {
     }
 
     public StatisticsResponse getStatistics(String email) throws AccessIsDeniedException {
-        if (userRepository.findByEmail(email).get().getIsModerator() == 1) {
+        if (statisticIsPublicAndUserRoleModerator(email)) {
             StatisticsResponse response = new StatisticsResponse();
             response.setPostsCount(postRepository.findAll().size());
             response.setViewCount(postRepository.getTotalViewCount());
@@ -178,29 +192,29 @@ public class PostService {
         return response;
     }
 
-    public Boolean addLike(Long postId, String email) {
-        User currentUser = userRepository.findByEmail(email).get();
-        if (postVotesRepository.findByUserId(currentUser.getId()).isPresent()) {
-            if (postVotesRepository.findByUserId(currentUser.getId()).get().getValue() == -1) {
-                postVotesRepository.changeDislikeToLike(currentUser.getId());
-                return true;
-            } else return postVotesRepository.findByUserId(currentUser.getId()).get().getValue() != 1;
-        } else {
-            postVotesRepository.addLike(postId, new Date(System.currentTimeMillis()), currentUser.getId());
+    public boolean addLike(Long postId, String email) {
+        Optional<User> currentUser = userRepository.findByEmail(email);
+        if (currentUser.isPresent() && isPostHasUserDislike(currentUser.get().getId())) {
+            postVotesRepository.changeDislikeToLike(currentUser.get().getId());
             return true;
+        } else if (currentUser.isPresent() && !isPostHasUserLike(currentUser.get().getId())){
+            postVotesRepository.addLike(postId, new Date(System.currentTimeMillis()), currentUser.get().getId());
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public Boolean addDislike(Long postId, String email) {
-        User currentUser = userRepository.findByEmail(email).get();
-        if (postVotesRepository.findByUserId(currentUser.getId()).isPresent()) {
-            if (postVotesRepository.findByUserId(currentUser.getId()).get().getValue() == 1) {
-                postVotesRepository.changeLikeToDislike(currentUser.getId());
-                return true;
-            } else return postVotesRepository.findByUserId(currentUser.getId()).get().getValue() != -1;
-        } else {
-            postVotesRepository.addDislike(postId, new Date(System.currentTimeMillis()), currentUser.getId());
+    public boolean addDislike(Long postId, String email) {
+        Optional<User> currentUser = userRepository.findByEmail(email);
+        if (currentUser.isPresent() && isPostHasUserLike(currentUser.get().getId())) {
+            postVotesRepository.changeLikeToDislike(currentUser.get().getId());
             return true;
+        } else if (currentUser.isPresent() && !isPostHasUserDislike(currentUser.get().getId())){
+            postVotesRepository.addDislike(postId, new Date(System.currentTimeMillis()), currentUser.get().getId());
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -213,6 +227,19 @@ public class PostService {
             return true;
         }
         return false;
+    }
+
+    private boolean isPostHasUserLike(long id) {
+        return postVotesRepository.findByUserId(id).get().getValue() == -1;
+    }
+
+    private boolean isPostHasUserDislike(long id) {
+        return postVotesRepository.findByUserId(id).get().getValue() == 1;
+    }
+
+    private boolean statisticIsPublicAndUserRoleModerator(String email) {
+        return userRepository.findByEmail(email).get().getIsModerator() == 1
+                && settingsService.getGlobalSettings().isStatisticsIsPublic();
     }
 
     private List<AddPostError> addPostErrors(AddPostRequest request) {
@@ -315,21 +342,20 @@ public class PostService {
     }
 
     private void savePostFromRequest(AddPostRequest request, Long userId) {
-        Post post = new Post();
-        post.setId(new Random().nextLong());
-        post.setText(request.getText());
-        post.setUserId(userId);
-        post.setTime(setDateToPost(request));
-        postRepository.save(post);
+        LocalDateTime time = setDateToPost(request);
+        postRepository.savePost(request.getIsActive(), request.getText(), time, userId);
+        saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
+    }
 
+    private void saveTagsForPost(AddPostRequest request, Long postId) {
         request.getTags().forEach(el -> {
-            if (tagRepository.getTagByName(el).getName().isEmpty()) {
+            if (tagRepository.getTagByName(el).isEmpty()) {
                 Tag tag = new Tag();
                 tag.setName(el);
                 tagRepository.save(tag);
             }
             tag2PostRepository
-                    .save(new Tag2Post(new Random().nextLong(), post.getId(), tagRepository.getTagByName(el).getId()));
+                    .save(new Tag2Post(new Random().nextLong(), postId, tagRepository.getTagByName(el).get().getId()));
         });
     }
 
