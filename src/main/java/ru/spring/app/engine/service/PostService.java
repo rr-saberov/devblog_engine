@@ -110,7 +110,8 @@ public class PostService {
     public PostsResponse getPostsOnDay(Integer offset, Integer limit, LocalDate date) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
         PostsResponse postsResponse = new PostsResponse();
-        Page<Post> postsPage = postRepository.getPostsPerDay(date, nextPage);
+        Page<Post> postsPage =
+                postRepository.getPostsPerDay(date.getDayOfMonth(), date.getMonthValue(), date.getYear(), nextPage);
         postsResponse.setCount(postsPage.getTotalElements());
         postsResponse.setPosts(postsPage.get().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
         return postsResponse;
@@ -341,24 +342,20 @@ public class PostService {
     }
 
     private void savePostFromRequest(AddPostRequest request, Long userId) {
-        Post post = new Post();
-        post.setId(new Random().nextLong());
-        post.setText(request.getText());
-        post.setUserId(userId);
-        post.setTime(setDateToPost(request));
-        postRepository.save(post);
-        saveTagsForPost(request, post.getId());
+        LocalDateTime time = setDateToPost(request);
+        postRepository.savePost(request.getIsActive(), request.getText(), time, userId);
+        saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
     }
 
     private void saveTagsForPost(AddPostRequest request, Long postId) {
         request.getTags().forEach(el -> {
-            if (tagRepository.getTagByName(el).getName().isEmpty()) {
+            if (tagRepository.getTagByName(el).isEmpty()) {
                 Tag tag = new Tag();
                 tag.setName(el);
                 tagRepository.save(tag);
             }
             tag2PostRepository
-                    .save(new Tag2Post(postId, tagRepository.getTagByName(el).getId()));
+                    .save(new Tag2Post(new Random().nextLong(), postId, tagRepository.getTagByName(el).get().getId()));
         });
     }
 

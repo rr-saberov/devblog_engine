@@ -12,7 +12,7 @@ import ru.spring.app.engine.entity.PostComments;
 import ru.spring.app.engine.entity.PostVotes;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -23,12 +23,22 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Post getPostByText(String text);
 
-    @Query("SELECT p " +
-            "FROM Post p " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
-            "AND p.time = :postDate " +
-            "ORDER BY p.time DESC")
-    Page<Post> getPostsPerDay(@Param("postDate") LocalDate postDate, Pageable pageable);
+//    @Query("SELECT p " +
+//            "FROM Post p " +
+//            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
+//            "AND p.time = :postDate " +
+//            "ORDER BY p.time DESC")
+//    Page<Post> getPostsPerDay(@Param("postDate") LocalDate postDate, Pageable pageable);
+
+    @Query(value =
+            "SELECT * FROM posts " +
+            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= CURRENT_DATE " +
+            "AND EXTRACT (DAY from time) = :day " +
+            "AND EXTRACT (MONTH from time) = :month " +
+            "AND EXTRACT (YEAR from time) = :year " +
+            "ORDER BY time DESC ", nativeQuery = true)
+    Page<Post> getPostsPerDay(@Param("day") Integer day, @Param("month") Integer month,
+                              @Param("year") Integer year, Pageable pageable);
 
     @Query("SELECT p " +
             "FROM Post p " +
@@ -145,13 +155,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Transactional
     @Modifying
     @Query("UPDATE Post p set p.viewCount = :view_count WHERE p.id = :id")
-    void updatePostInfo(@Param("view_count")Integer viewCount, @Param("id") Long postId);
+    void updatePostInfo(@Param("view_count") Integer viewCount, @Param("id") Long postId);
 
     @Transactional
     @Modifying
     @Query(value = "INSERT INTO posts (is_active, moderation_status, moderator_id, text, time, user_id, view_count) " +
-            "VALUES (:is_active, 'NEW', -1, :text, current_date , :id, 0)", nativeQuery = true)
-    void savePost(@Param("is_active") Integer isActive, @Param("text") String text,/* @Param("time") Date time,*/ @Param("id") Long id);
+            "VALUES (:is_active, 'NEW', -1, :text, :time , :id, 0)", nativeQuery = true)
+    void savePost(@Param("is_active") Integer isActive, @Param("text") String text,
+                  @Param("time") LocalDateTime time, @Param("id") Long userId);
 
     @Transactional
     @Modifying
@@ -196,4 +207,3 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> getUsersPostsOrderByTime(@Param("id") Long id);
 
 }
-
