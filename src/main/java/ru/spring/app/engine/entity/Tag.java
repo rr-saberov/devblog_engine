@@ -1,6 +1,7 @@
 package ru.spring.app.engine.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,6 +18,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "tags")
+@NoArgsConstructor
 public class Tag {
 
     @Id
@@ -34,4 +36,7 @@ public class Tag {
             inverseJoinColumns = @JoinColumn(name = "post_id"))
     private List<Post> posts;
 
+    public Tag(String name) {
+        this.name = name;
+    }
 }

@@ -11,9 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.request.ChangePasswordRequest;
 import ru.spring.app.engine.api.request.LoginRequest;
+import ru.spring.app.engine.api.request.RegistrationRequest;
+import ru.spring.app.engine.api.request.RestoreRequest;
 import ru.spring.app.engine.api.response.AuthResponse;
 import ru.spring.app.engine.api.response.AuthUserResponse;
-import ru.spring.app.engine.api.request.RegistrationRequest;
 import ru.spring.app.engine.api.response.ChangePasswordResponse;
 import ru.spring.app.engine.api.response.RegistrationResponse;
 import ru.spring.app.engine.api.response.errors.ChangePasswordError;
@@ -39,16 +40,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final GlobalSettingsRepository globalSettingsRepository;
     private final EmailService emailService;
+    private final CaptchaService captchaService;
 
     public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager,
                        CaptchaRepository captchaRepository, PasswordEncoder passwordEncoder,
-                       GlobalSettingsRepository globalSettingsRepository, EmailService emailService) {
+                       GlobalSettingsRepository globalSettingsRepository, EmailService emailService, CaptchaService captchaService) {
         this.userRepository = userRepository;
         this.captchaRepository = captchaRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.globalSettingsRepository = globalSettingsRepository;
         this.emailService = emailService;
+        this.captchaService = captchaService;
     }
 
     public AuthResponse login(LoginRequest loginRequest) {
@@ -84,25 +87,28 @@ public class AuthService {
     }
 
     public ChangePasswordResponse changePassword(ChangePasswordRequest request) throws CaptchaNotFoundException {
-       ChangePasswordResponse response = new ChangePasswordResponse();
-       ru.spring.app.engine.entity.User currentUser = userRepository.findByCode(request.getCode());
-       if (changePasswordErrors(request).isEmpty()) {
-           userRepository.updateUserPassword(passwordEncoder.encode(request.getPassword()), currentUser.getId());
-           response.setResult(true);
-       } else {
-           response.setResult(false);
-           response.setErrors(changePasswordErrors(request));
-       }
-       return response;
+        ChangePasswordResponse response = new ChangePasswordResponse();
+        List<ChangePasswordError> errors = changePasswordErrors(request);
+        ru.spring.app.engine.entity.User currentUser = userRepository.findByCode(request.getCode());
+        if (errors.isEmpty() && captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
+            userRepository.updateUserPassword(passwordEncoder.encode(request.getPassword()), currentUser.getId());
+            response.setResult(true);
+        } else if (captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
+            response.setResult(false);
+            response.setErrors(errors);
+        } else {
+            throw new CaptchaNotFoundException("wrong captcha");
+        }
+        return response;
     }
 
-    public Boolean restore(String email) {
+    public Boolean restore(RestoreRequest request) {
         RandomString randomString = new RandomString(20);
         String secret = randomString.nextString();
         String message = "https://localhost:8080/login/change-password/" + secret;
-        if (userRepository.findByEmail(email).isPresent()) {
-            userRepository.updateUserCode(secret, email);
-            emailService.sendEmail(email,"subject", message);
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            userRepository.updateUserCode(secret, request.getEmail());
+            emailService.sendEmail(request.getEmail(), "subject", message);
             return true;
         } else {
             return false;
@@ -144,7 +150,7 @@ public class AuthService {
             error.setCaptcha("invalid captcha");
             errors.add(error);
         }
-        if (request.getCode().equals(userRepository.findByCode(request.getCode()).getCode())) {
+        if (!request.getCode().equals(userRepository.findByCode(request.getCode()).getCode())) {
             ChangePasswordError error = new ChangePasswordError();
             error.setCode("invalid restore code");
             errors.add(error);
