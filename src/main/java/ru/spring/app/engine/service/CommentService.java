@@ -56,7 +56,8 @@ public class CommentService {
 
     private PostComments convertRequestToPostComments(CommentRequest comment, String email) {
         PostComments postComments = new PostComments();
-        LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.systemDefault());
+        LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()),
+                ZoneId.of("UTC").normalized());
         postComments.setParentId(comment.getParentId());
         postComments.setPostId(comment.getPostId());
         postComments.setText(comment.getText());
