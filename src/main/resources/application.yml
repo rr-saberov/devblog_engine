@@ -15,8 +15,8 @@ spring:
     show-sql: true
   mail:
     host: smtp.yandex.ru
-    username: 
-    password: 
+    username:
+    password:
     port: 465
     properties:
       mail:
