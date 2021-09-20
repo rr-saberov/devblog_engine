@@ -14,15 +14,15 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: username
-    password: password
+    host: smtp.yandex.ru
+    username: ruspro100
+    password: mbCzvYnIXtLeAdjNkeUp
+    port: 465
     properties:
       mail:
         smtp:
           auth: true
-          starttls:
+          ssl:
             enable: true
 liquibase:
   change-log: classpath:db/changelog/databaseChangeLog-master.xml

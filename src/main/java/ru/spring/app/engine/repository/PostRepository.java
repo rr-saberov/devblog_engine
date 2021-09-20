@@ -23,13 +23,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Post getPostByText(String text);
 
-//    @Query("SELECT p " +
-//            "FROM Post p " +
-//            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
-//            "AND p.time = :postDate " +
-//            "ORDER BY p.time DESC")
-//    Page<Post> getPostsPerDay(@Param("postDate") LocalDate postDate, Pageable pageable);
-
     @Query(value =
             "SELECT * FROM posts " +
             "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= CURRENT_DATE " +
@@ -163,6 +156,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "VALUES (:is_active, 'NEW', -1, :text, :time , :id, 0)", nativeQuery = true)
     void savePost(@Param("is_active") Integer isActive, @Param("text") String text,
                   @Param("time") LocalDateTime time, @Param("id") Long userId);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Post p SET p.isActive = :is_active, p.text = :text, p.time = :time")
+    void updatePost(@Param("is_active") Integer isActive, @Param("text") String text,
+                    @Param("time") LocalDateTime time);
 
     @Transactional
     @Modifying

@@ -2,6 +2,7 @@ package ru.spring.app.engine.service;
 
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.response.SingleTagResponse;
+import ru.spring.app.engine.api.response.TagWithCount;
 import ru.spring.app.engine.api.response.TagsResponse;
 import ru.spring.app.engine.entity.Tag;
 import ru.spring.app.engine.repository.TagRepository;
@@ -28,14 +29,10 @@ public class TagService {
 
     private List<SingleTagResponse> getSingleTagsResponses(String query) {
         List<SingleTagResponse> singleTagResponses = new ArrayList<>();
-        tagRepository.getTagsOrderByPopularity().forEach(tag -> {
-            SingleTagResponse tagResponse = new SingleTagResponse();
-            if (tag.getName().startsWith(query) && !singleTagResponses.contains(tag)) {
-                tagResponse.setName(tag.getName());
-                tagResponse.setWeight(getTagWeight(tag.getName()));
-            }
-            singleTagResponses.add(tagResponse);
-        });
+        List<TagWithCount> tagWithCounts = tagRepository.getTagsWithCount().stream().filter(tag ->
+                        tag.getTag().contains(query)).collect(Collectors.toList());
+        tagWithCounts.forEach(tag -> singleTagResponses.add(new SingleTagResponse(tag.getTag(),
+                getTagWeight(tag.getTag()))));
         return singleTagResponses;
     }
 

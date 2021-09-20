@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.tags.form.OptionTag;
+import ru.spring.app.engine.api.response.TagWithCount;
 import ru.spring.app.engine.entity.Tag;
 
 import java.util.List;
@@ -22,6 +23,16 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
             "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date " +
             "ORDER BY (SELECT DISTINCT COUNT (*))", nativeQuery = true)
     List<Tag> getTagsOrderByPopularity();
+
+
+    @Query("SELECT new ru.spring.app.engine.api.response.TagWithCount(t.name, size(t.posts)) " +
+            "FROM Tag AS t ORDER BY t.posts.size DESC")
+    List<TagWithCount> getTagsWithCount();
+
+//    @Query("SELECT new com.baeldung.aggregation.model.custom.CommentCount(c.year, COUNT(c.year)) "
+//            + "FROM Comment AS c GROUP BY c.year ORDER BY c.year DESC")
+//    List<CommentCount> countTotalCommentsByYearClass();
+//
 
     @Query(value = "SELECT COUNT (*) " +
             "FROM posts " +

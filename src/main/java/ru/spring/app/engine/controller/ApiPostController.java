@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.spring.app.engine.api.request.AddPostRequest;
 import ru.spring.app.engine.api.request.CommentRequest;
+import ru.spring.app.engine.api.request.VoteRequest;
 import ru.spring.app.engine.api.response.AddCommentResponse;
 import ru.spring.app.engine.api.response.AddPostResponse;
 import ru.spring.app.engine.api.response.CurrentPostResponse;
+import ru.spring.app.engine.api.response.OkResult;
 import ru.spring.app.engine.api.response.PostsResponse;
 import ru.spring.app.engine.exceptions.PostNotFoundException;
 import ru.spring.app.engine.service.CommentService;
@@ -128,7 +130,7 @@ public class ApiPostController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddPostResponse> updatePost(@PathVariable("ID") Long id, @RequestBody AddPostRequest request) {
         LOGGER.info("try to change post");
-        return ResponseEntity.ok(postService.updatePost(id, request));
+        return ResponseEntity.ok(postService.updatePost(request));
     }
 
     @PostMapping("/comment")
@@ -142,16 +144,14 @@ public class ApiPostController {
     @PostMapping("/post/like")
     @Operation(summary = "method to add like")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<Boolean> addLike(@RequestParam Long postId, Principal principal) {
-        Boolean result = postService.addLike(postId, principal.getName());
-        return ResponseEntity.ok(result);
+    public ResponseEntity<OkResult> addLike(@RequestBody VoteRequest request, Principal principal) {
+        return ResponseEntity.ok(postService.addLike(request, principal.getName()));
     }
 
     @PostMapping("/post/dislike")
     @Operation(summary = "method to add dislike")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<Boolean> addDislike(@RequestParam Long postId, Principal principal) {
-        Boolean result = postService.addDislike(postId, principal.getName());
-        return ResponseEntity.ok(result);
+    public ResponseEntity<OkResult> addDislike(@RequestParam VoteRequest request, Principal principal) {
+        return ResponseEntity.ok(postService.addDislike(request, principal.getName()));
     }
 }
