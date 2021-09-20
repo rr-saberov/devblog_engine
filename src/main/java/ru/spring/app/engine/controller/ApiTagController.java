@@ -30,7 +30,7 @@ public class ApiTagController {
 
     @GetMapping("/api/tag")
     @Operation(summary= "get tags by user response")
-    public ResponseEntity<TagsResponse> tags(@RequestParam(required = false) String query) {
+    public ResponseEntity<TagsResponse> tags(@RequestParam String query) {
         return ResponseEntity.ok(tagService.getTags(query));
     }
 }
