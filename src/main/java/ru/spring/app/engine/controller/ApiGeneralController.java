@@ -2,6 +2,7 @@ package ru.spring.app.engine.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import ru.spring.app.engine.api.request.EditProfileRequest;
 import ru.spring.app.engine.api.request.SettingsRequest;
 import ru.spring.app.engine.api.response.CalendarResponse;
 import ru.spring.app.engine.api.response.EditProfileResponse;
@@ -27,7 +28,6 @@ import ru.spring.app.engine.service.PostService;
 import ru.spring.app.engine.service.SettingsService;
 import ru.spring.app.engine.service.UserService;
 
-import java.io.IOException;
 import java.security.Principal;
 
 @RestController
@@ -66,7 +66,7 @@ public class ApiGeneralController {
     @PutMapping("/settings")
     @Operation(summary = "method to change settings")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<Boolean> updateSettings(SettingsRequest request) {
+    public ResponseEntity<Boolean> updateSettings(@RequestBody SettingsRequest request) {
         LOGGER.info("try to change global settings");
         return ResponseEntity.ok(settingsService.updateGlobalSettings(request));
     }
@@ -77,21 +77,26 @@ public class ApiGeneralController {
         return ResponseEntity.ok(postService.getPostsCountInTheYear(year));
     }
 
+    @SneakyThrows
     @PostMapping("/image")
     @Operation(summary = "method to upload image")
     @PreAuthorize("hasAuthority('user:write')")
-    public String saveImage(@RequestBody MultipartFile file) throws IOException {
+    public String saveImage(@RequestPart MultipartFile file) {
         LOGGER.info("try to upload image");
-        String savePath = storage.saveNewImage(file);
+        String savePath = storage.updateUserImage(file);
         return (savePath);
     }
 
     @PostMapping("/profile/my")
     @Operation(summary = "method to change profile")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<EditProfileResponse> editProfile(@RequestBody EditProfileRequest request, Principal principal) {
+    public ResponseEntity<EditProfileResponse> editProfile(@RequestParam String name,
+                                                           @RequestParam String email,
+                                                           @RequestParam String password,
+                                                           @RequestParam Integer removePhoto,
+                                                           @RequestPart MultipartFile image, Principal principal) {
         LOGGER.info("try to change user profile");
-        return ResponseEntity.ok(userService.editProfile(request, principal));
+        return ResponseEntity.ok(userService.editProfile(name, email, password, removePhoto, image, principal));
     }
 
     @GetMapping("/statistics/my")

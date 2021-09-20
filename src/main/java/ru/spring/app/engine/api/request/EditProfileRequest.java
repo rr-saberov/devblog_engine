@@ -9,4 +9,6 @@ public class EditProfileRequest {
     private String name;
     private String email;
     private String password;
+    private Integer removePhoto;
+    private String photo;
 }

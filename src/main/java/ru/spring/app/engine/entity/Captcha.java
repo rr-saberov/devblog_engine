@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -23,7 +24,7 @@ public class Captcha {
     private long id;
 
     @Column(nullable = false)
-    private Date time;
+    private LocalDateTime time;
 
     @Column(nullable = false)
     private String code;
@@ -31,7 +32,7 @@ public class Captcha {
     @Column(nullable = false)
     private String secretCode;
 
-    public Captcha(Date time, String code, String secretCode) {
+    public Captcha(LocalDateTime time, String code, String secretCode) {
         this.time = time;
         this.code = code;
         this.secretCode = secretCode;

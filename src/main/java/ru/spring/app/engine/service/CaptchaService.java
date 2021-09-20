@@ -9,8 +9,8 @@ import ru.spring.app.engine.api.response.CaptchaResponse;
 import ru.spring.app.engine.entity.Captcha;
 import ru.spring.app.engine.repository.CaptchaRepository;
 
+import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.Date;
 
 @Service
 public class CaptchaService {
@@ -27,7 +27,7 @@ public class CaptchaService {
         Cage cage = new GCage();
         String token = cage.getTokenGenerator().next();
         String secretCode = new RandomString(12).nextString();
-        captchaRepository.save(new Captcha(new Date(), token, secretCode));
+        captchaRepository.save(new Captcha(LocalDateTime.now(), token, secretCode));
         byte[] fileContent = cage.draw(token);
         String encodedString = "data:image/png;base64, " + Base64.getEncoder().encodeToString(fileContent);
         return new CaptchaResponse(secretCode, encodedString);
@@ -40,7 +40,7 @@ public class CaptchaService {
 
     private void restoreOldCaptcha() {
         captchaRepository.findAll().forEach(cp -> {
-            if(cp.getTime().before(new Date(System.currentTimeMillis() - 3600 * 1000)))
+            if(cp.getTime().isBefore(LocalDateTime.now().plusHours(1)))
                 captchaRepository.delete(cp);
         });
     }

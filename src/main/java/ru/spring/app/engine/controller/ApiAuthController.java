@@ -2,6 +2,7 @@ package ru.spring.app.engine.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -10,16 +11,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.spring.app.engine.api.request.ChangePasswordRequest;
 import ru.spring.app.engine.api.request.LoginRequest;
 import ru.spring.app.engine.api.request.RegistrationRequest;
+import ru.spring.app.engine.api.request.RestoreRequest;
 import ru.spring.app.engine.api.response.AuthResponse;
 import ru.spring.app.engine.api.response.CaptchaResponse;
 import ru.spring.app.engine.api.response.ChangePasswordResponse;
 import ru.spring.app.engine.api.response.RegistrationResponse;
-import ru.spring.app.engine.exceptions.CaptchaNotFoundException;
 import ru.spring.app.engine.exceptions.RegistrationFailedException;
 import ru.spring.app.engine.service.AuthService;
 import ru.spring.app.engine.service.CaptchaService;
@@ -90,21 +90,17 @@ public class ApiAuthController {
 
     @PostMapping("/restore")
     @Operation(summary = "method to restore password")
-    public ResponseEntity<Boolean> restore(@RequestParam("email") String email) {
+    public ResponseEntity<Boolean> restore(@RequestBody RestoreRequest response) {
         LOGGER.info("restore users password");
-        Boolean result = authService.restore(email);
+        Boolean result = authService.restore(response);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/password")
+    @SneakyThrows
     @Operation(summary = "method to change password")
-    public ResponseEntity<ChangePasswordResponse> changePassword(@RequestBody ChangePasswordRequest request) throws CaptchaNotFoundException {
-        if (captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
-            LOGGER.info("user attempt to change password");
-            return ResponseEntity.ok(authService.changePassword(request));
-        } else {
-            LOGGER.error("user entered the wrong captcha");
-            throw new CaptchaNotFoundException("wrong captcha");
-        }
+    public ResponseEntity<ChangePasswordResponse> changePassword(@RequestBody ChangePasswordRequest request) {
+        LOGGER.info("user attempt to change password");
+        return ResponseEntity.ok(authService.changePassword(request));
     }
 }
