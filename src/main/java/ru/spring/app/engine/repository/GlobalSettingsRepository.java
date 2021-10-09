@@ -24,7 +24,7 @@ public interface GlobalSettingsRepository extends JpaRepository<GlobalSettings, 
 
     @Transactional
     @Modifying
-    @Query("UPDATE GlobalSettings settings SET settings.value = :post_premoderation WHERE settings.code = 'POST_PREMODERATION'")
+    @Query("UPDATE GlobalSettings settings SET settings.value = :post_premoderation WHERE settings.code = 'POST_MODERATION'")
     void updatePostPreModeration(@Param("post_premoderation") String postPreModeration);
 
     @Transactional
