@@ -81,9 +81,9 @@ public class ApiGeneralController {
     @PostMapping("/image")
     @Operation(summary = "method to upload image")
     @PreAuthorize("hasAuthority('user:write')")
-    public String saveImage(@RequestPart MultipartFile file) {
+    public String saveImage(@RequestPart MultipartFile image) {
         LOGGER.info("try to upload image");
-        String savePath = storage.updateUserImage(file);
+        String savePath = storage.updateUserImage(image);
         return (savePath);
     }
 
@@ -94,12 +94,12 @@ public class ApiGeneralController {
                                                            @RequestParam String email,
                                                            @RequestParam String password,
                                                            @RequestParam Integer removePhoto,
-                                                           @RequestPart MultipartFile image, Principal principal) {
+                                                           @RequestPart(name = "photo") MultipartFile photo, Principal principal) {
         LOGGER.info("try to change user profile");
-        return ResponseEntity.ok(userService.editProfile(name, email, password, removePhoto, image, principal));
+        return ResponseEntity.ok(userService.editProfile(name, email, password, removePhoto, photo, principal));
     }
 
-    @GetMapping("/statistics/my")
+    @GetMapping("/statistics/my") 
     @Operation(summary = "method to get users statistics")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<StatisticsResponse> getMyStatistics(Principal principal) {
