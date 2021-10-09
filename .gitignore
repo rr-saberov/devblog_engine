@@ -62,4 +62,4 @@ out/
 
 /src/main/resources/upload
 
-/src/main/resources/application.yml
+src/main/resources/application.yml
