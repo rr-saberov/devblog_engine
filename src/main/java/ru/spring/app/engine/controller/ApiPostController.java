@@ -151,7 +151,7 @@ public class ApiPostController {
     @PostMapping("/post/dislike")
     @Operation(summary = "method to add dislike")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<OkResult> addDislike(@RequestParam VoteRequest request, Principal principal) {
+    public ResponseEntity<OkResult> addDislike(@RequestBody VoteRequest request, Principal principal) {
         return ResponseEntity.ok(postService.addDislike(request, principal.getName()));
     }
 }
