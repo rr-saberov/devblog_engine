@@ -169,18 +169,17 @@ public class PostService {
     }
 
     public StatisticsResponse getStatistics(String email) throws AccessIsDeniedException {
-        if (statisticIsPublicAndUserRoleModerator(email)) {
-            StatisticsResponse response = new StatisticsResponse();
-            response.setPostsCount(postRepository.findAll().size());
-            response.setViewCount(postRepository.getTotalViewCount());
-            response.setLikesCount(postRepository.getTotalLikesCount());
-            response.setDislikesCount(postRepository.getTotalDislikesCount());
-            response.setFirstPublication(postRepository.getPostsOrderByTime().get(0).getTime()
-                    .toEpochSecond(ZoneOffset.UTC));
-            return response;
-        } else {
+        if (!statisticIsPublicAndUserRoleModerator(email)) {
             throw new AccessIsDeniedException("access to statistic is denied");
         }
+        StatisticsResponse response = new StatisticsResponse();
+        response.setPostsCount(postRepository.findAll().size());
+        response.setViewCount(postRepository.getTotalViewCount());
+        response.setLikesCount(postRepository.getTotalLikesCount());
+        response.setDislikesCount(postRepository.getTotalDislikesCount());
+        response.setFirstPublication(postRepository.getPostsOrderByTime().get(0).getTime()
+                .toEpochSecond(ZoneOffset.UTC));
+        return response;
     }
 
     public StatisticsResponse getUserStatistics(String email) {
@@ -350,15 +349,12 @@ public class PostService {
     private void savePostFromRequest(AddPostRequest request, Long userId) {
         LocalDateTime time = setDateToPost(request);
         Post post = new Post();
-        Long postId = new Random().nextLong();
-        post.setId(postId);
         post.setIsActive(request.getIsActive());
         post.setModerationStatus(ModerationStatus.NEW);
         post.setTime(time);
         post.setUserId(userId);
-        post.setTags(saveTagsForPost(request, postId));
-        //postRepository.savePost(request.getIsActive(), request.getText(), time, userId);
-//        saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
+        postRepository.savePost(request.getIsActive(), request.getText(), time, userId);
+        saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
     }
 
     private void editPostFromRequest(AddPostRequest request) {
@@ -375,22 +371,11 @@ public class PostService {
                 tagRepository.save(new Tag(tag));
                 tag2PostRepository.save(new Tag2Post(postId, tagRepository.getTagByName(tag).get().getId()));
             }
+            long tagId = tagRepository.getTagByName(tag).get().getId();
+            tag2PostRepository.save(new Tag2Post(postId, tagId));
         });
-        tag2PostRepository.save(new Tag2Post(postId, postId));
         return userTags;
     }
-
-//    private void saveTagsForPost(AddPostRequest request, Long postId) {
-//        request.getTags().forEach(el -> {
-//            if (tagRepository.getTagByName(el).isEmpty()) {
-//                Tag tag = new Tag();
-//                tag.setName(el);
-//                tagRepository.save(tag);
-//            }
-//            tag2PostRepository
-//                    .save(new Tag2Post(new Random().nextLong(), postId, tagRepository.getTagByName(el).get().getId()));
-//        });
-//    }
 
     private LocalDateTime setDateToPost(AddPostRequest request) {
         LocalDateTime date = LocalDateTime.now();

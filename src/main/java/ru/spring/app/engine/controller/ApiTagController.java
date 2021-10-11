@@ -6,11 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.spring.app.engine.api.response.TagWithCount;
 import ru.spring.app.engine.api.response.TagsResponse;
 import ru.spring.app.engine.service.TagService;
-
-import java.util.List;
 
 @RestController
 @Tag(name = "tag controller")
@@ -21,12 +18,6 @@ public class ApiTagController {
     public ApiTagController(TagService tagService) {
         this.tagService = tagService;
     }
-
-//    @GetMapping("/api/tag")
-//    @Operation(summary= "get tags by user response")
-//    public ResponseEntity<List<TagWithCount>> tags(@RequestParam String query) {
-//        return ResponseEntity.ok(tagService.tags(query));
-//    }
 
     @GetMapping("/api/tag")
     @Operation(summary= "get tags by user response")
