@@ -363,18 +363,17 @@ public class PostService {
         saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
     }
 
-    private List<Tag> saveTagsForPost(AddPostRequest request, Long postId) {
+    private void saveTagsForPost(AddPostRequest request, Long postId) {
         List<String> requestTags = request.getTags();
-        List<Tag> userTags = new ArrayList<>();
-        requestTags.forEach(tag -> {
-            if (tagRepository.getTagByName(tag).isEmpty()) {
-                tagRepository.save(new Tag(tag));
-                tag2PostRepository.save(new Tag2Post(postId, tagRepository.getTagByName(tag).get().getId()));
+        for (String t: requestTags) {
+            if (tagRepository.getTagByName(t).isEmpty()) {
+                Tag tag = new Tag();
+                tag.setName(t);
+                tagRepository.save(tag);
             }
-            long tagId = tagRepository.getTagByName(tag).get().getId();
+            long tagId = tagRepository.getTagByName(t).get().getId();
             tag2PostRepository.save(new Tag2Post(postId, tagId));
-        });
-        return userTags;
+        }
     }
 
     private LocalDateTime setDateToPost(AddPostRequest request) {
