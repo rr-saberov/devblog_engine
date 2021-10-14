@@ -14,7 +14,8 @@ public class SpringFoxConfig {
 
     @Bean
     public Docket docket() {
-        return new Docket(DocumentationType.SWAGGER_2).select()
+        return new Docket(DocumentationType.SWAGGER_2)
+                .select()
                 .apis(RequestHandlerSelectors.basePackage("ru.spring.app.engine.controller"))
                 .paths(PathSelectors.any())
                 .build();
