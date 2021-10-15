@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.spring.app.engine.api.request.AddPostRequest;
 import ru.spring.app.engine.api.request.CommentRequest;
+import ru.spring.app.engine.api.request.ModerationRequest;
 import ru.spring.app.engine.api.request.VoteRequest;
 import ru.spring.app.engine.api.response.AddCommentResponse;
 import ru.spring.app.engine.api.response.AddPostResponse;
@@ -112,8 +113,8 @@ public class ApiPostController {
     @PostMapping("/moderation")
     @Operation(summary = "method to moderate post")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<Boolean> moderatePost(@RequestParam Long postId, @RequestParam String decision) {
-        Boolean result = postService.moderatePost(postId, decision);
+    public ResponseEntity<Boolean> moderatePost(@RequestBody ModerationRequest request) {
+        Boolean result = postService.moderatePost(request);
         return ResponseEntity.ok(result);
     }
 
