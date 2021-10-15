@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.request.AddPostRequest;
+import ru.spring.app.engine.api.request.ModerationRequest;
 import ru.spring.app.engine.api.request.VoteRequest;
 import ru.spring.app.engine.api.response.AddPostResponse;
 import ru.spring.app.engine.api.response.CalendarResponse;
@@ -46,7 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -221,12 +221,12 @@ public class PostService {
         }
     }
 
-    public Boolean moderatePost(Long id, String decision) {
-        if (decision.equals("accept")) {
-            postRepository.updatePostStatus(ModerationStatus.ACCEPTED.name(), id);
+    public Boolean moderatePost(ModerationRequest request) {
+        if (request.getDecision().equals("accept")) {
+            postRepository.updatePostStatus(ModerationStatus.ACCEPTED, request.getPostId());
             return true;
-        } else if (decision.equals("decline")) {
-            postRepository.updatePostStatus("DECLINED", id);
+        } else if (request.getDecision().equals("decline")) {
+            postRepository.updatePostStatus(ModerationStatus.DECLINED, request.getPostId());
             return true;
         }
         return false;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import ru.spring.app.engine.entity.Post;
 import ru.spring.app.engine.entity.PostComments;
 import ru.spring.app.engine.entity.PostVotes;
+import ru.spring.app.engine.entity.enums.ModerationStatus;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -166,7 +167,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Transactional
     @Modifying
     @Query("UPDATE Post p set p.moderationStatus = :moderation_status WHERE p.id = :id")
-    void updatePostStatus(@Param("moderation_status") String moderationStatus, @Param("id") Long postId);
+    void updatePostStatus(@Param("moderation_status") ModerationStatus moderationStatus, @Param("id") Long postId);
 
     @Query(value = "SELECT SUM (view_count) FROM posts", nativeQuery = true)
     long getTotalViewCount();
