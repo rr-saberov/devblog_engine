@@ -166,8 +166,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE Post p set p.moderationStatus = :moderation_status WHERE p.id = :id")
-    void updatePostStatus(@Param("moderation_status") ModerationStatus moderationStatus, @Param("id") Long postId);
+    @Query(value = "UPDATE posts set (moderation_status = :moderation_status)::mod_status WHERE id = :id", nativeQuery = true)
+    void updatePostStatus(@Param("moderation_status") String moderationStatus, @Param("id") Long postId);
 
     @Query(value = "SELECT SUM (view_count) FROM posts", nativeQuery = true)
     long getTotalViewCount();
