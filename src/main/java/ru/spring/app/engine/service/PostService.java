@@ -223,10 +223,10 @@ public class PostService {
 
     public Boolean moderatePost(ModerationRequest request) {
         if (request.getDecision().equals("accept")) {
-            postRepository.updatePostStatus(ModerationStatus.ACCEPTED, request.getPostId());
+            postRepository.updatePostStatus(ModerationStatus.ACCEPTED.name(), request.getPostId());
             return true;
         } else if (request.getDecision().equals("decline")) {
-            postRepository.updatePostStatus(ModerationStatus.DECLINED, request.getPostId());
+            postRepository.updatePostStatus(ModerationStatus.DECLINED.name(), request.getPostId());
             return true;
         }
         return false;
