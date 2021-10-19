@@ -32,7 +32,7 @@ public class UserService {
                                            MultipartFile file, Principal principal) {
         EditProfileRequest request = createEditProfileRequest(name, email, password, removePhoto);
         EditProfileResponse response = new EditProfileResponse();
-        List<EditProfileError> errors = getErrors(request, file);
+        List<EditProfileError> errors = getErrors(request, file, principal);
         User currentUser = userRepository.findByEmail(principal.getName()).get();
         if (errors.isEmpty() && !currentUser.getEmail().equals(request.getEmail())) {
             userRepository.updateUserEmail(request.getEmail(), currentUser.getId());
@@ -62,9 +62,10 @@ public class UserService {
         return request;
     }
 
-    private List<EditProfileError> getErrors(EditProfileRequest request, MultipartFile file) {
+    private List<EditProfileError> getErrors(EditProfileRequest request, MultipartFile file, Principal principal) {
         List<EditProfileError> errors = new ArrayList<>();
-        if (!request.getEmail().isEmpty() && userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (!request.getEmail().isEmpty() && !principal.getName().equals(request.getEmail()) &&
+                userRepository.findByEmail(request.getEmail()).isPresent()) {
             EditProfileError error = new EditProfileError();
             error.setEmail("you sent an incorrect email");
             errors.add(error);

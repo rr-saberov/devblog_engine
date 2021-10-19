@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 import ru.spring.app.engine.entity.Post;
 import ru.spring.app.engine.entity.PostComments;
@@ -160,13 +161,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE Post p SET p.isActive = :is_active, p.text = :text, p.time = :time")
-    void updatePost(@Param("is_active") Integer isActive, @Param("text") String text,
-                    @Param("time") LocalDateTime time);
+    @Query("UPDATE Post p SET p.isActive = :is_active, p.text = :text, p.time = :time WHERE p.id = :id")
+    void updatePost(@Param("is_active") Integer isActive, @Param("text") String text, @Param("time") LocalDateTime time, @Param("id") long id);
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE posts set (moderation_status = :moderation_status)::mod_status WHERE id = :id", nativeQuery = true)
+    @Query(value = "UPDATE posts set moderation_status = (:moderation_status)::mod_status WHERE id = :id", nativeQuery = true)
     void updatePostStatus(@Param("moderation_status") String moderationStatus, @Param("id") Long postId);
 
     @Query(value = "SELECT SUM (view_count) FROM posts", nativeQuery = true)
