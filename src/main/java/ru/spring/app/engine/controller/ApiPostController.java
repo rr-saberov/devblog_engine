@@ -131,7 +131,7 @@ public class ApiPostController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddPostResponse> updatePost(@PathVariable("ID") Long id, @RequestBody AddPostRequest request) {
         LOGGER.info("try to change post");
-        return ResponseEntity.ok(postService.updatePost(request));
+        return ResponseEntity.ok(postService.updatePost(id, request));
     }
 
     @PostMapping("/comment")

@@ -156,11 +156,11 @@ public class PostService {
         return response;
     }
 
-    public AddPostResponse updatePost(AddPostRequest request) {
+    public AddPostResponse updatePost(long id, AddPostRequest request) {
         AddPostResponse response = new AddPostResponse();
         if (addPostErrors(request).isEmpty()) {
             response.setResult(true);
-            editPostFromRequest(request);
+            editPostFromRequest(id, request);
         } else {
             response.setResult(false);
             response.setErrors(addPostErrors(request));
@@ -357,9 +357,9 @@ public class PostService {
         saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
     }
 
-    private void editPostFromRequest(AddPostRequest request) {
+    private void editPostFromRequest(long id, AddPostRequest request) {
         LocalDateTime time = setDateToPost(request);
-        postRepository.updatePost(request.getIsActive(), request.getText(), time);
+        postRepository.updatePost(request.getIsActive(), request.getText(), time, id);
         saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
     }
 
@@ -367,9 +367,7 @@ public class PostService {
         List<String> requestTags = request.getTags();
         for (String t: requestTags) {
             if (tagRepository.getTagByName(t).isEmpty()) {
-                Tag tag = new Tag();
-                tag.setName(t);
-                tagRepository.save(tag);
+                tagRepository.save(new Tag(t));
             }
             long tagId = tagRepository.getTagByName(t).get().getId();
             tag2PostRepository.save(new Tag2Post(postId, tagId));
