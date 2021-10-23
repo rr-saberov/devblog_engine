@@ -5,6 +5,7 @@ import ru.spring.app.engine.api.request.CommentRequest;
 import ru.spring.app.engine.api.response.AddCommentResponse;
 import ru.spring.app.engine.api.response.errors.AddCommentError;
 import ru.spring.app.engine.entity.PostComments;
+import ru.spring.app.engine.exceptions.AddCommentFailException;
 import ru.spring.app.engine.repository.CommentRepository;
 import ru.spring.app.engine.repository.PostRepository;
 import ru.spring.app.engine.repository.UserRepository;
@@ -29,9 +30,10 @@ public class CommentService {
         this.userRepository = userRepository;
     }
 
-    public AddCommentResponse addComment(CommentRequest comment, String email) {
-        if (!addErrorsToList(comment).isEmpty()) {
-            return createResponseWithErrors(comment);
+    public AddCommentResponse addComment(CommentRequest comment, String email) throws AddCommentFailException {
+        List<AddCommentError> errors = addErrorsToList(comment);
+        if (!errors.isEmpty()) {
+            return createResponseWithErrors(comment, errors);
         }
         commentsRepository.save(convertRequestToPostComments(comment, email));
         AddCommentResponse response = new AddCommentResponse();
@@ -40,13 +42,13 @@ public class CommentService {
         return response;
     }
 
-    private List<AddCommentError> addErrorsToList(CommentRequest comment) {
+    private List<AddCommentError> addErrorsToList(CommentRequest comment) throws AddCommentFailException {
         List<AddCommentError> errors = new ArrayList<>();
         if (comment.getPostId() == 0 && commentsRepository.findById(comment.getParentId()).isEmpty()) {
-            errors.add(new AddCommentError("add fail, no comment with such id"));
+            throw new AddCommentFailException("no comment with such id");
         }
         if (postRepository.findById(comment.getPostId()).isEmpty()) {
-            errors.add(new AddCommentError("add fail, no post with such id"));
+            throw new AddCommentFailException("no post with such id");
         }
         if (comment.getText().length() <= 10) {
             errors.add(new AddCommentError("add fail, the text is too short"));
@@ -66,10 +68,10 @@ public class CommentService {
         return postComments;
     }
 
-    private AddCommentResponse createResponseWithErrors(CommentRequest commentRequest) {
+    private AddCommentResponse createResponseWithErrors(CommentRequest commentRequest, List<AddCommentError> errors) {
         AddCommentResponse response = new AddCommentResponse();
         response.setResult(false);
-        response.setErrors(addErrorsToList(commentRequest));
+        response.setErrors(errors);
         return response;
     }
 }

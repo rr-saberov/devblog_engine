@@ -94,7 +94,8 @@ public class ApiGeneralController {
                                                            @RequestParam String email,
                                                            @RequestParam String password,
                                                            @RequestParam Integer removePhoto,
-                                                           @RequestPart(name = "photo") MultipartFile photo, Principal principal) {
+                                                           @RequestPart(name = "photo") MultipartFile photo,
+                                                           Principal principal) {
         LOGGER.info("try to change user profile");
         return ResponseEntity.ok(userService.editProfile(name, email, password, removePhoto, photo, principal));
     }
