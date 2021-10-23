@@ -1,17 +1,15 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender emailSender;
-
-    public EmailService(JavaMailSender emailSender) {
-        this.emailSender = emailSender;
-    }
 
     public void sendEmail(String address, String subject, String message) {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();

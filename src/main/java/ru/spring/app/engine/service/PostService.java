@@ -1,6 +1,8 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,13 +24,15 @@ import ru.spring.app.engine.api.response.enums.ResultStatus;
 import ru.spring.app.engine.api.response.enums.UserPostsStatus;
 import ru.spring.app.engine.api.response.errors.AddPostError;
 import ru.spring.app.engine.entity.Post;
+import ru.spring.app.engine.entity.PostComments;
 import ru.spring.app.engine.entity.PostVotes;
 import ru.spring.app.engine.entity.Tag;
 import ru.spring.app.engine.entity.Tag2Post;
 import ru.spring.app.engine.entity.User;
 import ru.spring.app.engine.entity.enums.ModerationStatus;
-import ru.spring.app.engine.exceptions.AccessIsDeniedException;
-import ru.spring.app.engine.exceptions.PostNotFoundException;
+import ru.spring.app.engine.exception.AccessIsDeniedException;
+import ru.spring.app.engine.exception.AddPostFailException;
+import ru.spring.app.engine.exception.PostNotFoundException;
 import ru.spring.app.engine.repository.PostRepository;
 import ru.spring.app.engine.repository.PostVotesRepository;
 import ru.spring.app.engine.repository.Tag2PostRepository;
@@ -50,6 +54,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
@@ -58,17 +63,6 @@ public class PostService {
     private final PostVotesRepository postVotesRepository;
     private final Tag2PostRepository tag2PostRepository;
     private final SettingsService settingsService;
-
-    public PostService(PostRepository postRepository, UserRepository userRepository,
-                       TagRepository tagRepository, PostVotesRepository postVotesRepository,
-                       Tag2PostRepository tag2PostRepository, SettingsService settingsService) {
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.tagRepository = tagRepository;
-        this.postVotesRepository = postVotesRepository;
-        this.tag2PostRepository = tag2PostRepository;
-        this.settingsService = settingsService;
-    }
 
     public PostsResponse getPosts(Integer offset, Integer limit, String mode) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
@@ -94,7 +88,7 @@ public class PostService {
     public PostsResponse getUserPosts(Integer offset, Integer limit, String status, String email) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
         Page<Post> page = switch (UserPostsStatus.valueOf(status.toUpperCase())) {
-            case INAСTIVE -> postRepository.getInactivePostsByUser(nextPage, email);
+            case INACTIVE -> postRepository.getInactivePostsByUser(nextPage, email);
             case PENDING -> postRepository.getPendingPostsByUser(nextPage, email);
             case DECLINED -> postRepository.getDeclinedPostsByUser(nextPage, email);
             case PUBLISHED -> postRepository.getPublishedPostsByUser(nextPage, email);
@@ -114,8 +108,11 @@ public class PostService {
     public PostsResponse getPostsOnDay(Integer offset, Integer limit, LocalDate date) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
         PostsResponse postsResponse = new PostsResponse();
-        Page<Post> postsPage =
-                postRepository.getPostsPerDay(date.getDayOfMonth(), date.getMonthValue(), date.getYear(), nextPage);
+        List<Post> posts = postRepository.getPosts().stream()
+                .filter(p -> p.getTime().getYear() == date.getYear()
+                        && p.getTime().getMonthValue() == date.getMonthValue()
+                        && p.getTime().getDayOfMonth() == date.getDayOfMonth()).collect(Collectors.toList());
+        Page<Post> postsPage = new PageImpl<>(posts, nextPage, posts.size());
         postsResponse.setCount(postsPage.getTotalElements());
         postsResponse.setPosts(postsPage.get().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
         return postsResponse;
@@ -136,14 +133,14 @@ public class PostService {
 
     public CurrentPostResponse getPostById(Long id) throws PostNotFoundException {
         if (postRepository.findById(id).isPresent()) {
-            postRepository.updatePostInfo(postRepository.getPostsById(id).getViewCount() + 1, id);
-            return convertPostToCurrentPostResponse(postRepository.getPostsById(id));
+            postRepository.updatePostInfo(postRepository.getPostById(id).getViewCount() + 1, id);
+            return convertPostToCurrentPostResponse(postRepository.getPostById(id));
         } else {
             throw new PostNotFoundException("post with id: " + id + " not found");
         }
     }
 
-    public AddPostResponse addNewPost(AddPostRequest request, Principal principal) {
+    public AddPostResponse addNewPost(AddPostRequest request, Principal principal) throws AddPostFailException {
         AddPostResponse response = new AddPostResponse();
         Long userId = userRepository.getUserIdByEmail(principal.getName());
         if (addPostErrors(request).isEmpty()) {
@@ -249,11 +246,13 @@ public class PostService {
 
     private List<AddPostError> addPostErrors(AddPostRequest request) {
         List<AddPostError> errors = new ArrayList<>();
-        if (request.getTitle().isEmpty() || request.getTitle().length() < 5) {
-            AddPostError titleError = new AddPostError("title", "Заголовок не установлен");
+        if (request.getTitle().isEmpty() || request.getTitle().length() < 3) {
+            AddPostError titleError = new AddPostError();
+            titleError.setTitle("No title set");
             errors.add(titleError);
-        } else if (request.getText().isEmpty() || request.getText().length() < 20) {
-            AddPostError textError = new AddPostError("text", "текс слишком короткий");
+        } else if (request.getText().isEmpty() || request.getText().length() < 50) {
+            AddPostError textError = new AddPostError();
+            textError.setText("The text is too short ");
             errors.add(textError);
         }
         return errors;
@@ -274,8 +273,9 @@ public class PostService {
         userResponse.setName(postRepository.getNameFromPost(post.getUserId()));
         postResponse.setId(post.getId());
         postResponse.setTimestamp(timestamp.getTime());
-        postResponse.setTitle(post.getText());
-        postResponse.setAnnounce(post.getText().substring(8));
+        postResponse.setTitle(post.getTitle());
+        postResponse.setText(post.getText());
+        postResponse.setAnnounce(createAnnounce(post.getText()));
         postResponse.setLikeCount(postRepository.getVotesForPost(post.getId())
                 .stream().filter(vote -> vote.getValue() == 1).count());
         postResponse.setDislikeCount(postRepository.getVotesForPost(post.getId())
@@ -284,6 +284,17 @@ public class PostService {
         postResponse.setViewCount(post.getViewCount());
         postResponse.setUserResponse(userResponse);
         return postResponse;
+    }
+
+    private String createAnnounce(String text) {
+        StringBuilder builder = new StringBuilder();
+        String[] words = text.split(" ").length > 10 ?
+                text.split(" ") : (String[]) List.of(text.substring(0, 10)).toArray();
+        for (int i = 0; i < 10; i++) {
+            words[i].replaceAll("\\<.+/\\>", " ");
+            builder.append(words[i]).append(" ");
+        }
+        return builder.toString();
     }
 
     private CurrentPostResponse convertPostToCurrentPostResponse(Post post) {
@@ -296,7 +307,8 @@ public class PostService {
         userResponse.setName(postRepository.getNameFromPost(post.getUserId()));
         postResponse.setId(post.getId());
         postResponse.setTimestamp(new Timestamp(post.getTime().toEpochSecond(ZoneOffset.UTC)).getTime());
-        postResponse.setTitle(post.getText());
+        postResponse.setTitle(post.getTitle());
+        postResponse.setText(post.getText());
         postResponse.setLikeCount(postRepository.getVotesForPost(post.getId())
                 .stream().filter(vote -> vote.getValue() == 1).count());
         postResponse.setDislikeCount(postRepository.getVotesForPost(post.getId())
@@ -311,18 +323,18 @@ public class PostService {
 
     private List<CommentResponse> convertPostCommentsToResponse(Long postId) {
         List<CommentResponse> responses = new ArrayList<>();
-        postRepository.getCommentsForPost(postId).forEach(postComments -> {
-            User currentUser = userRepository.getUsersById(postComments.getUserId());
+        for (PostComments pc : postRepository.getCommentsForPost(postId)) {
+            User currentUser = userRepository.getUsersById(pc.getUserId());
             CommentResponse commentResponse = new CommentResponse();
-            commentResponse.setId(postComments.getId());
-            commentResponse.setText(postComments.getText());
-            commentResponse.setTimestamp(postComments.getTime().toEpochSecond(ZoneOffset.UTC));
+            commentResponse.setId(pc.getId());
+            commentResponse.setText(pc.getText());
+            commentResponse.setTimestamp(pc.getTime().toEpochSecond(ZoneOffset.UTC));
             commentResponse.setUser(new UserResponse(
                     currentUser.getId(),
                     currentUser.getName(),
                     currentUser.getPhoto()));
             responses.add(commentResponse);
-        });
+        }
         return responses;
     }
 
@@ -346,41 +358,37 @@ public class PostService {
         return calendarResponse;
     }
 
-    private void savePostFromRequest(AddPostRequest request, Long userId) {
+    private void savePostFromRequest(AddPostRequest request, Long userId) throws AddPostFailException {
         LocalDateTime time = setDateToPost(request);
-        Post post = new Post();
-        post.setIsActive(request.getIsActive());
-        post.setModerationStatus(ModerationStatus.NEW);
-        post.setTime(time);
-        post.setUserId(userId);
-        postRepository.savePost(request.getIsActive(), request.getText(), time, userId);
-        saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
+        if (postRepository.getPostByText(request.getText()).isEmpty()) {
+            postRepository.savePost(request.getIsActive(), request.getTitle(), request.getText(), time, userId);
+            saveTagsForPost(request, postRepository.getPostByText(request.getText()).get().getId());
+        } else {
+            throw new AddPostFailException("similar post already exists");
+        }
     }
 
     private void editPostFromRequest(long id, AddPostRequest request) {
         LocalDateTime time = setDateToPost(request);
-        postRepository.updatePost(request.getIsActive(), request.getText(), time, id);
-        saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
+        postRepository.updatePost(request.getIsActive(), request.getTitle(), request.getText(), time, id);
+        saveTagsForPost(request, postRepository.getPostByText(request.getText()).get().getId());
     }
 
     private void saveTagsForPost(AddPostRequest request, Long postId) {
         List<String> requestTags = request.getTags();
-        for (String t: requestTags) {
+        for (String t : requestTags) {
             if (tagRepository.getTagByName(t).isEmpty()) {
-                tagRepository.save(new Tag(t));
+                tagRepository.save(new Tag(null, t));
             }
             long tagId = tagRepository.getTagByName(t).get().getId();
-            tag2PostRepository.save(new Tag2Post(postId, tagId));
+            tag2PostRepository.save(new Tag2Post(null, postId, tagId));
         }
     }
 
     private LocalDateTime setDateToPost(AddPostRequest request) {
-        LocalDateTime date = LocalDateTime.now();
-        if (LocalDateTime.now().isAfter(
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getTimestamp()), ZoneId.systemDefault()))) {
-            date = LocalDateTime
-                    .ofInstant(Instant.ofEpochMilli(request.getTimestamp() * 1000), ZoneId.systemDefault());
-        }
-        return date;
+        return LocalDateTime.now()
+                .isAfter(LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getTimestamp()), ZoneId.systemDefault())) ?
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getTimestamp() * 1000), ZoneId.systemDefault()) :
+                LocalDateTime.now();
     }
 }

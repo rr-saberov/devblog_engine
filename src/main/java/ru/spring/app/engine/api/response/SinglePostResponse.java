@@ -10,6 +10,7 @@ public class SinglePostResponse {
     @JsonProperty("user")
     private UserResponse userResponse;
     private String title;
+    private String text;
     private String announce;
     private long likeCount;
     private long dislikeCount;

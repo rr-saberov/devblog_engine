@@ -1,5 +1,6 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,8 +21,8 @@ import ru.spring.app.engine.api.response.RegistrationResponse;
 import ru.spring.app.engine.api.response.errors.ChangePasswordError;
 import ru.spring.app.engine.api.response.errors.RegistrationProfileError;
 import ru.spring.app.engine.entity.Captcha;
-import ru.spring.app.engine.exceptions.CaptchaNotFoundException;
-import ru.spring.app.engine.exceptions.RegistrationFailedException;
+import ru.spring.app.engine.exception.CaptchaNotFoundException;
+import ru.spring.app.engine.exception.RegistrationFailedException;
 import ru.spring.app.engine.repository.CaptchaRepository;
 import ru.spring.app.engine.repository.GlobalSettingsRepository;
 import ru.spring.app.engine.repository.UserRepository;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -42,24 +44,13 @@ public class AuthService {
     private final EmailService emailService;
     private final CaptchaService captchaService;
 
-    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager,
-                       CaptchaRepository captchaRepository, PasswordEncoder passwordEncoder,
-                       GlobalSettingsRepository globalSettingsRepository, EmailService emailService, CaptchaService captchaService) {
-        this.userRepository = userRepository;
-        this.captchaRepository = captchaRepository;
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-        this.globalSettingsRepository = globalSettingsRepository;
-        this.emailService = emailService;
-        this.captchaService = captchaService;
-    }
 
     public AuthResponse login(LoginRequest loginRequest) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        User user = (User) auth.getPrincipal();
-        return convertToResponse(user.getUsername());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            User user = (User) auth.getPrincipal();
+            return convertToResponse(user.getUsername());
     }
 
     public AuthResponse check(Principal principal) {
@@ -117,6 +108,11 @@ public class AuthService {
 
     private List<RegistrationProfileError> getErrors(RegistrationRequest request) {
         List<RegistrationProfileError> errors = new ArrayList<>();
+        if (!captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
+            RegistrationProfileError error = new RegistrationProfileError();
+            error.setCaptcha("incorrect captcha entered ");
+            errors.add(error);
+        }
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             RegistrationProfileError error = new RegistrationProfileError();
             error.setEmail("This email is already registered");
@@ -164,6 +160,7 @@ public class AuthService {
         AuthUserResponse userResponse = new AuthUserResponse();
         userResponse.setEmail(currentUser.getEmail());
         userResponse.setName(currentUser.getName());
+        userResponse.setPhoto(currentUser.getPhoto());
         userResponse.setModeration(currentUser.getIsModerator() == 1);
         userResponse.setId(currentUser.getId());
         AuthResponse authResponse = new AuthResponse();

@@ -1,4 +1,4 @@
-package ru.spring.app.engine.exceptions;
+package ru.spring.app.engine.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 "Access is denied", exception), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(AddCommentFailException.class)
+    @ExceptionHandler({AddCommentFailException.class, AddPostFailException.class})
     public ResponseEntity<ApiErrorResponse> handleAddCommentFailException(Exception exception) {
         return new ResponseEntity<>(new ApiErrorResponse(HttpStatus.BAD_REQUEST,
                 "bad request", exception), HttpStatus.BAD_REQUEST);

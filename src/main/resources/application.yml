@@ -26,6 +26,11 @@ spring:
             enable: true
 liquibase:
   change-log: classpath:db/changelog/databaseChangeLog-master.xml
+cloudinary:
+  config:
+    cloud-name:
+    api-key:
+    api-secret:
 
 blog:
   title: DevPub
@@ -33,7 +38,7 @@ blog:
   phone: +7 903 664-44-55
   email: ruslan@mail.ru
   copyright: Ruslan Saberov
-  copyrightFrom: 2020
+  copyrightFrom: 2021
 
 upload:
-  path: C:\Projects\BackendBlog\devblog_engine\src\main\resources\upload
+  path: src/main/resources/upload

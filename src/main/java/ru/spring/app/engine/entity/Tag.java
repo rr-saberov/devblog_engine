@@ -24,7 +24,7 @@ public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, columnDefinition = "serial")
-    private long id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -36,7 +36,8 @@ public class Tag {
             inverseJoinColumns = @JoinColumn(name = "post_id"))
     private List<Post> posts;
 
-    public Tag(String name) {
+    public Tag(Long id ,String name) {
+        this.id = id;
         this.name = name;
     }
 }

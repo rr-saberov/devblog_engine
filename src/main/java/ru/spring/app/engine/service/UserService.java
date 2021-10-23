@@ -1,5 +1,6 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,17 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ImageStorage imageStorage;
-
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ImageStorage imageStorage) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.imageStorage = imageStorage;
-    }
 
     @SneakyThrows
     public EditProfileResponse editProfile(String name, String email, String password, Integer removePhoto,
@@ -44,7 +40,7 @@ public class UserService {
             userRepository.updateUserPassword(passwordEncoder.encode(request.getPassword()), currentUser.getId());
             response.setResult(true);
         } else if (errors.isEmpty() && file != null){
-            userRepository.updateUserImage(imageStorage.updateUserImage(file), currentUser.getId());
+            userRepository.updateUserImage(imageStorage.uploadImageFile(file), currentUser.getId());
             response.setResult(true);
         } else {
             response.setErrors(errors);
@@ -82,6 +78,7 @@ public class UserService {
             error.setPhoto("file size is too big or file is empty");
             errors.add(error);
         }
+
         return errors;
     }
 }

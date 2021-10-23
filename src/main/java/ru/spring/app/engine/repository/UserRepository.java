@@ -21,9 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User getUserByCode(String code);
 
-    @Query("SELECT u.id " +
-            "FROM User u " +
-            "WHERE u.email = :email")
+    @Query("SELECT u.id FROM User u WHERE u.email = :email")
     Long getUserIdByEmail(@Param("email") String email);
 
     @Modifying

@@ -2,9 +2,9 @@ package ru.spring.app.engine.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,7 @@ import ru.spring.app.engine.api.response.EditProfileResponse;
 import ru.spring.app.engine.api.response.InitResponse;
 import ru.spring.app.engine.api.response.SettingsResponse;
 import ru.spring.app.engine.api.response.StatisticsResponse;
-import ru.spring.app.engine.exceptions.AccessIsDeniedException;
+import ru.spring.app.engine.exception.AccessIsDeniedException;
 import ru.spring.app.engine.service.ImageStorage;
 import ru.spring.app.engine.service.PostService;
 import ru.spring.app.engine.service.SettingsService;
@@ -30,26 +30,18 @@ import ru.spring.app.engine.service.UserService;
 
 import java.security.Principal;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 @Tag(name = "api general controller")
 public class ApiGeneralController {
 
-    private static final Logger LOGGER = LogManager.getLogger(ApiGeneralController.class);
     private final SettingsService settingsService;
     private final PostService postService;
     private final InitResponse initResponse;
     private final ImageStorage storage;
     private final UserService userService;
-
-    public ApiGeneralController(SettingsService settingsService, PostService postService,
-                                InitResponse initResponse, ImageStorage storage, UserService userService) {
-        this.settingsService = settingsService;
-        this.postService = postService;
-        this.initResponse = initResponse;
-        this.storage = storage;
-        this.userService = userService;
-    }
 
     @GetMapping("/init")
     @Operation(summary = "init method")
@@ -67,7 +59,7 @@ public class ApiGeneralController {
     @Operation(summary = "method to change settings")
     @PreAuthorize("hasAuthority('user:moderate')")
     public ResponseEntity<Boolean> updateSettings(@RequestBody SettingsRequest request) {
-        LOGGER.info("try to change global settings");
+        log.info("try to change global settings");
         return ResponseEntity.ok(settingsService.updateGlobalSettings(request));
     }
 
@@ -82,8 +74,8 @@ public class ApiGeneralController {
     @Operation(summary = "method to upload image")
     @PreAuthorize("hasAuthority('user:write')")
     public String saveImage(@RequestPart MultipartFile image) {
-        LOGGER.info("try to upload image");
-        String savePath = storage.updateUserImage(image);
+        log.info("try to upload image");
+        String savePath = storage.uploadImageFile(image);
         return (savePath);
     }
 
@@ -92,14 +84,15 @@ public class ApiGeneralController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<EditProfileResponse> editProfile(@RequestParam String name,
                                                            @RequestParam String email,
-                                                           @RequestParam String password,
-                                                           @RequestParam Integer removePhoto,
-                                                           @RequestPart(name = "photo") MultipartFile photo, Principal principal) {
-        LOGGER.info("try to change user profile");
+                                                           @RequestParam(required = false) String password,
+                                                           @RequestParam(required = false) Integer removePhoto,
+                                                           @RequestPart(name = "photo", required = false) MultipartFile photo,
+                                                           Principal principal) {
+        log.info("try to change user profile");
         return ResponseEntity.ok(userService.editProfile(name, email, password, removePhoto, photo, principal));
     }
 
-    @GetMapping("/statistics/my") 
+    @GetMapping("/statistics/my")
     @Operation(summary = "method to get users statistics")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<StatisticsResponse> getMyStatistics(Principal principal) {
@@ -110,7 +103,7 @@ public class ApiGeneralController {
     @Operation(summary = "method to get all statistics")
     @PreAuthorize("hasAuthority('user:moderate')")
     public ResponseEntity<StatisticsResponse> getStatistics(Principal principal) throws AccessIsDeniedException {
-            LOGGER.info("try to view statistics");
-            return ResponseEntity.ok(postService.getStatistics(principal.getName()));
+        log.info("try to view statistics");
+        return ResponseEntity.ok(postService.getStatistics(principal.getName()));
     }
 }

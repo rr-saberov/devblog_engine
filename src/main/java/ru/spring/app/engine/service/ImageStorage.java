@@ -1,46 +1,49 @@
 package ru.spring.app.engine.service;
 
-import net.bytebuddy.utility.RandomString;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.spring.app.engine.exception.ImageUploadException;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Objects;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class ImageStorage {
-
-    private final static Logger LOGGER = LogManager.getLogger(ImageStorage.class);
 
     @Value("${upload.path}")
     String uploadPath;
 
-    public String updateUserImage(MultipartFile file) throws IOException {
-        String resourceURI = null;
-        RandomString random = new RandomString(4);
-        String path = uploadPath + "/" + random.nextString() + "/" + random.nextString();
+    private final Cloudinary cloudinary;
 
-        if (!file.isEmpty()) {
-            if (!new File(path).exists()) {
-                Files.createDirectories(Paths.get(path));
-                LOGGER.info("create image folder in " + path);
-            }
-
-            String fileName = random.nextString() + random.nextString()
-                    + "." + FilenameUtils.getExtension(file.getOriginalFilename());
-            Path imagePath = Paths.get(path, fileName);
-            resourceURI = "/upload/" + fileName;
-            file.transferTo(imagePath);
-            LOGGER.info(fileName + " uploaded OK!");
+    public String uploadImageFile(MultipartFile file) throws IOException, ImageUploadException {
+        if (Objects.equals(file.getContentType(), "image/jpeg") && !file.isEmpty()) {
+            Map uploadResult;
+            File uploadedImage = convertMultipartFileToFile(file);
+            uploadResult = cloudinary.uploader().upload(uploadedImage, ObjectUtils.emptyMap());
+            uploadedImage.delete();
+            log.info("image uploaded success!");
+            return uploadResult.get("url").toString();
+        } else {
+            throw new ImageUploadException("wrong file type or empty file");
         }
-
-        return resourceURI;
     }
+
+    private File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
+        File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            outputStream.write(multipartFile.getBytes());
+        }
+        return file;
+    }
+
 }

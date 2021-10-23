@@ -27,10 +27,10 @@ dependencies {
     implementation group: 'com.github.cage', name: 'cage', version: '1.0'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'org.postgresql:postgresql:42.2.23'
-
+    implementation 'com.cloudinary:cloudinary-core:1.30.0'
+    implementation 'com.cloudinary:cloudinary-http44:1.30.0'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

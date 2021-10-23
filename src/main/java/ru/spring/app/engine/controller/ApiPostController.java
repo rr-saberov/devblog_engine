@@ -2,8 +2,8 @@ package ru.spring.app.engine.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,52 +24,47 @@ import ru.spring.app.engine.api.response.AddPostResponse;
 import ru.spring.app.engine.api.response.CurrentPostResponse;
 import ru.spring.app.engine.api.response.OkResult;
 import ru.spring.app.engine.api.response.PostsResponse;
-import ru.spring.app.engine.exceptions.PostNotFoundException;
+import ru.spring.app.engine.exception.AddCommentFailException;
+import ru.spring.app.engine.exception.AddPostFailException;
+import ru.spring.app.engine.exception.PostNotFoundException;
 import ru.spring.app.engine.service.CommentService;
 import ru.spring.app.engine.service.PostService;
 
 import java.security.Principal;
 import java.time.LocalDate;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 @Tag(name = "post controller for rest api")
 public class ApiPostController {
 
-    private static final Logger LOGGER = LogManager.getLogger(ApiPostController.class);
     private final PostService postService;
     private final CommentService commentsService;
 
-    public ApiPostController(PostService postService, CommentService commentsService) {
-        this.postService = postService;
-        this.commentsService = commentsService;
-    }
-
     @GetMapping("/post")
     @Operation(summary = "method to get all posts")
-    public ResponseEntity<PostsResponse> getPosts(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "30") Integer limit,
-            @RequestParam(defaultValue = "recent") String mode) {
+    public ResponseEntity<PostsResponse> getPosts(@RequestParam(defaultValue = "0") Integer offset,
+                                                  @RequestParam(defaultValue = "30") Integer limit,
+                                                  @RequestParam(defaultValue = "recent") String mode) {
         return ResponseEntity.ok(postService.getPosts(offset, limit, mode));
     }
 
     @GetMapping("/post/search")
     @Operation(summary = "method to search posts")
-    public ResponseEntity<PostsResponse> searchPosts(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "test") String query) {
+    public ResponseEntity<PostsResponse> searchPosts(@RequestParam(defaultValue = "0") Integer offset,
+                                                     @RequestParam(defaultValue = "10") Integer limit,
+                                                     @RequestParam(defaultValue = "test") String query) {
         return ResponseEntity.ok(postService.getPostsByUserRequest(offset, limit, query));
     }
 
     @GetMapping("/post/byDate")
     @Operation(summary = "method to get posts by date")
-    public ResponseEntity<PostsResponse> getPostsByDate(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "5") Integer limit,
-            @RequestParam(defaultValue = "2005-10-9")
-            @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate date) {
+    public ResponseEntity<PostsResponse> getPostsByDate(@RequestParam(defaultValue = "0") Integer offset,
+                                                        @RequestParam(defaultValue = "5") Integer limit,
+                                                        @RequestParam(defaultValue = "2005-10-9")
+                                                        @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         return ResponseEntity.ok(postService.getPostsOnDay(offset, limit, date));
     }
 
@@ -85,28 +80,26 @@ public class ApiPostController {
     @GetMapping("/post/{ID}")
     @Operation(summary = "method to get post by id")
     public ResponseEntity<CurrentPostResponse> postById(@PathVariable(value = "ID") Long id) throws PostNotFoundException {
-        LOGGER.info("try to get post by id");
+        log.info("try to get post by id");
         return ResponseEntity.ok(postService.getPostById(id));
     }
 
     @GetMapping("/post/moderation")
     @Operation(summary = "method to get posts for moderation")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<PostsResponse> postsForModeration(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "ACCEPTED") String status) {
+    public ResponseEntity<PostsResponse> postsForModeration(@RequestParam(defaultValue = "0") Integer offset,
+                                                            @RequestParam(defaultValue = "10") Integer limit,
+                                                            @RequestParam(defaultValue = "ACCEPTED") String status) {
         return ResponseEntity.ok(postService.getPostsForModeration(offset, limit, status));
     }
 
     @GetMapping("/post/my")
     @Operation(summary = "method to get users posts")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<PostsResponse> userPosts(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "published") String status,
-            Principal principal) {
+    public ResponseEntity<PostsResponse> userPosts(@RequestParam(defaultValue = "0") Integer offset,
+                                                   @RequestParam(defaultValue = "10") Integer limit,
+                                                   @RequestParam(defaultValue = "published") String status,
+                                                   Principal principal) {
         return ResponseEntity.ok(postService.getUserPosts(offset, limit, status, principal.getName()));
     }
 
@@ -121,8 +114,8 @@ public class ApiPostController {
     @PostMapping("/post")
     @Operation(summary = "method to add new post")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<AddPostResponse> addPost(@RequestBody AddPostRequest request, Principal principal) {
-        LOGGER.info("try to add post");
+    public ResponseEntity<AddPostResponse> addPost(@RequestBody AddPostRequest request, Principal principal) throws AddPostFailException {
+        log.info("try to add post");
         return ResponseEntity.ok(postService.addNewPost(request, principal));
     }
 
@@ -130,15 +123,16 @@ public class ApiPostController {
     @Operation(summary = "method to update post")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddPostResponse> updatePost(@PathVariable("ID") Long id, @RequestBody AddPostRequest request) {
-        LOGGER.info("try to change post");
+        log.info("try to change post");
         return ResponseEntity.ok(postService.updatePost(id, request));
     }
 
     @PostMapping("/comment")
     @Operation(summary = "method to add comment")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<AddCommentResponse> addComment(@RequestBody CommentRequest comment, Principal principal) {
-        LOGGER.info("try to add comment");
+    public ResponseEntity<AddCommentResponse> addComment(@RequestBody CommentRequest comment,
+                                                         Principal principal) throws AddCommentFailException {
+        log.info("try to add comment");
         return ResponseEntity.ok(commentsService.addComment(comment, principal.getName()));
     }
 
