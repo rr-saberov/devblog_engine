@@ -6,12 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 import ru.spring.app.engine.entity.Post;
 import ru.spring.app.engine.entity.PostComments;
 import ru.spring.app.engine.entity.PostVotes;
-import ru.spring.app.engine.entity.enums.ModerationStatus;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -120,9 +118,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "WHERE users.id = :id ", nativeQuery = true)
     String getNameFromPost(@Param("id") Long id);
 
-    @Query("SELECT pc " +
-            "FROM PostComments pc " +
-            "WHERE pc.postId = :id")
+    @Query("SELECT pc FROM PostComments pc WHERE pc.postId = :id")
     List<PostComments> getCommentsForPost(@Param("id") Long id);
 
     @Query(value = "SELECT CAST ((time) AS VARCHAR(255)) as date, CAST (COUNT(*) AS varchar(255)) as amount_posts " +
@@ -140,11 +136,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Map<String, String>> getPostsInYear(@Param("year") Integer year);
 
 
-    @Query(value = "SELECT CAST (date_part('year', time) AS INTEGER) as year " +
-            "FROM posts " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date " +
-            "GROUP BY year " +
-            "ORDER BY year", nativeQuery = true)
+    @Query(value = "SELECT CAST (date_part('year', time) AS INTEGER) as year FROM posts " +
+            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date GROUP BY year ORDER BY year",
+            nativeQuery = true)
     List<Integer> getYears();
 
     @Transactional
@@ -166,7 +160,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE posts set moderation_status = (:moderation_status)::mod_status WHERE id = :id", nativeQuery = true)
+    @Query(value = "UPDATE posts set moderation_status = CAST(:moderation_status AS mod_status) WHERE id = :id",
+            nativeQuery = true)
     void updatePostStatus(@Param("moderation_status") String moderationStatus, @Param("id") Long postId);
 
     @Query(value = "SELECT SUM (view_count) FROM posts", nativeQuery = true)
@@ -175,35 +170,22 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(value = "SELECT SUM (view_count) FROM posts WHERE user_id = :id", nativeQuery = true)
     long getViewCountOnUserPosts(@Param("id") Long id);
 
-    @Query(value = "SELECT COUNT(id) " +
-            "FROM post_votes " +
-            "WHERE value = 1", nativeQuery = true)
+    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = 1", nativeQuery = true)
     long getTotalLikesCount();
 
-    @Query(value = "SELECT COUNT(id) " +
-            "FROM post_votes " +
-            "WHERE value = 1 AND user_id = :id", nativeQuery = true)
+    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = 1 AND user_id = :id", nativeQuery = true)
     long getLikesCountForUserPosts(@Param("id") Long id);
 
-    @Query(value = "SELECT COUNT(id) " +
-            "FROM post_votes " +
-            "WHERE value = -1", nativeQuery = true)
+    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = -1", nativeQuery = true)
     long getTotalDislikesCount();
 
-    @Query(value = "SELECT COUNT(id) " +
-            "FROM post_votes " +
-            "WHERE value = -1 AND user_id = :id", nativeQuery = true)
+    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = -1 AND user_id = :id", nativeQuery = true)
     long getDislikesCountForUserPosts(@Param("id") Long id);
 
-    @Query("SELECT p " +
-            "FROM Post p " +
-            "ORDER BY p.time")
+    @Query("SELECT p FROM Post p ORDER BY p.time")
     List<Post> getPostsOrderByTime();
 
-    @Query("SELECT p " +
-            "FROM Post p " +
-            "WHERE p.userId = :id " +
-            "ORDER BY p.time")
+    @Query("SELECT p FROM Post p WHERE p.userId = :id ORDER BY p.time")
     List<Post> getUsersPostsOrderByTime(@Param("id") Long id);
 
 }
