@@ -48,29 +48,26 @@ public class ApiPostController {
 
     @GetMapping("/post")
     @Operation(summary = "method to get all posts")
-    public ResponseEntity<PostsResponse> getPosts(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "30") Integer limit,
-            @RequestParam(defaultValue = "recent") String mode) {
+    public ResponseEntity<PostsResponse> getPosts(@RequestParam(defaultValue = "0") Integer offset,
+                                                  @RequestParam(defaultValue = "30") Integer limit,
+                                                  @RequestParam(defaultValue = "recent") String mode) {
         return ResponseEntity.ok(postService.getPosts(offset, limit, mode));
     }
 
     @GetMapping("/post/search")
     @Operation(summary = "method to search posts")
-    public ResponseEntity<PostsResponse> searchPosts(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "test") String query) {
+    public ResponseEntity<PostsResponse> searchPosts(@RequestParam(defaultValue = "0") Integer offset,
+                                                     @RequestParam(defaultValue = "10") Integer limit,
+                                                     @RequestParam(defaultValue = "test") String query) {
         return ResponseEntity.ok(postService.getPostsByUserRequest(offset, limit, query));
     }
 
     @GetMapping("/post/byDate")
     @Operation(summary = "method to get posts by date")
-    public ResponseEntity<PostsResponse> getPostsByDate(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "5") Integer limit,
-            @RequestParam(defaultValue = "2005-10-9")
-            @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate date) {
+    public ResponseEntity<PostsResponse> getPostsByDate(@RequestParam(defaultValue = "0") Integer offset,
+                                                        @RequestParam(defaultValue = "5") Integer limit,
+                                                        @RequestParam(defaultValue = "2005-10-9")
+                                                        @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         return ResponseEntity.ok(postService.getPostsOnDay(offset, limit, date));
     }
 
@@ -93,21 +90,19 @@ public class ApiPostController {
     @GetMapping("/post/moderation")
     @Operation(summary = "method to get posts for moderation")
     @PreAuthorize("hasAuthority('user:moderate')")
-    public ResponseEntity<PostsResponse> postsForModeration(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "ACCEPTED") String status) {
+    public ResponseEntity<PostsResponse> postsForModeration(@RequestParam(defaultValue = "0") Integer offset,
+                                                            @RequestParam(defaultValue = "10") Integer limit,
+                                                            @RequestParam(defaultValue = "ACCEPTED") String status) {
         return ResponseEntity.ok(postService.getPostsForModeration(offset, limit, status));
     }
 
     @GetMapping("/post/my")
     @Operation(summary = "method to get users posts")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<PostsResponse> userPosts(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "10") Integer limit,
-            @RequestParam(defaultValue = "published") String status,
-            Principal principal) {
+    public ResponseEntity<PostsResponse> userPosts(@RequestParam(defaultValue = "0") Integer offset,
+                                                   @RequestParam(defaultValue = "10") Integer limit,
+                                                   @RequestParam(defaultValue = "published") String status,
+                                                   Principal principal) {
         return ResponseEntity.ok(postService.getUserPosts(offset, limit, status, principal.getName()));
     }
 

@@ -37,12 +37,10 @@ public class ApiAuthController {
     private static final Logger LOGGER = LogManager.getLogger(ApiAuthController.class);
     private final AuthService authService;
     private final CaptchaService captchaService;
-    private final EmailService emailService;
 
-    public ApiAuthController(AuthService authService, CaptchaService captchaService, EmailService emailService) {
+    public ApiAuthController(AuthService authService, CaptchaService captchaService) {
         this.authService = authService;
         this.captchaService = captchaService;
-        this.emailService = emailService;
     }
 
     @PostMapping("/login")

@@ -57,9 +57,9 @@ public class AuthService {
     public AuthResponse login(LoginRequest loginRequest) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        User user = (User) auth.getPrincipal();
-        return convertToResponse(user.getUsername());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            User user = (User) auth.getPrincipal();
+            return convertToResponse(user.getUsername());
     }
 
     public AuthResponse check(Principal principal) {
