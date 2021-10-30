@@ -94,7 +94,7 @@ public class PostService {
     public PostsResponse getUserPosts(Integer offset, Integer limit, String status, String email) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
         Page<Post> page = switch (UserPostsStatus.valueOf(status.toUpperCase())) {
-            case INAСTIVE -> postRepository.getInactivePostsByUser(nextPage, email);
+            case INACTIVE -> postRepository.getInactivePostsByUser(nextPage, email);
             case PENDING -> postRepository.getPendingPostsByUser(nextPage, email);
             case DECLINED -> postRepository.getDeclinedPostsByUser(nextPage, email);
             case PUBLISHED -> postRepository.getPublishedPostsByUser(nextPage, email);
