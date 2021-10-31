@@ -24,6 +24,7 @@ public class TagService {
     public TagsResponse getTags(String query) {
         return new TagsResponse(getSingleTagsResponses(query).stream()
                 .sorted(Comparator.comparing(SingleTagResponse::getWeight).reversed())
+                .filter(t -> t.getWeight() != 0)
                 .collect(Collectors.toList()));
     }
 
