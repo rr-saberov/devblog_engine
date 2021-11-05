@@ -30,18 +30,25 @@ public class TagService {
 
     private List<SingleTagResponse> getSingleTagsResponses(String query) {
         List<SingleTagResponse> singleTagResponses = new ArrayList<>();
-        List<TagWithCount> tagWithCounts = tagRepository.getTagsWithCount().stream().filter(tag ->
-                        tag.getTag().contains(query)).collect(Collectors.toList());
+        List<TagWithCount> tagWithCounts;
+        if (query != null) {
+            tagWithCounts = tagRepository.getTagsWithCount().stream().filter(tag ->
+                    tag.getTag().contains(query)).collect(Collectors.toList());
+        } else {
+            tagWithCounts = tagRepository.getTagsWithCount();
+        }
         tagWithCounts.forEach(tag -> singleTagResponses.add(new SingleTagResponse(tag.getTag(),
                 getTagWeight(tag.getTag()))));
         return singleTagResponses;
     }
-
+    //todo: use tag2post repo
     private Double getTagWeight(String tagName) {
         Tag mostPopularTag = tagRepository.getTagsOrderByPopularity().get(0);
+        double test = tagRepository.getTagsByName(mostPopularTag.getName()).size();
         long postsCount = tagRepository.getPostsCount();
-        double coefficient = 1 /
-                ((double) tagRepository.getPostsCountWithTag(mostPopularTag.getName()) / (double) postsCount);
-        return ((double) tagRepository.getPostsCountWithTag(tagName) / postsCount * coefficient);
+        double wight = (double) tagRepository.getTagsByName(tagName).size() / (double) postsCount;
+        Double normWeight = test / postsCount;
+        double coefficient = 1 / normWeight;
+        return wight * coefficient;
     }
 }

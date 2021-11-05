@@ -16,6 +16,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 
     Optional<Tag> getTagByName(String name);
 
+    List<Tag> getTagsByName(String name);
+
     @Query(value = "SELECT * " +
             "FROM tags " +
             "JOIN tag2post ON tags.id = tag2post.tag_id " +
