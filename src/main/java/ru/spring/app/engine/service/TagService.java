@@ -41,12 +41,14 @@ public class TagService {
                 getTagWeight(tag.getTag()))));
         return singleTagResponses;
     }
-
+    //todo: use tag2post repo
     private Double getTagWeight(String tagName) {
         Tag mostPopularTag = tagRepository.getTagsOrderByPopularity().get(0);
+        double test = tagRepository.getTagsByName(mostPopularTag.getName()).size();
         long postsCount = tagRepository.getPostsCount();
-        double coefficient =
-                1 / ((double) tagRepository.getPostsCountWithTag(mostPopularTag.getName()) / (double) postsCount);
-        return ((double) tagRepository.getPostsCountWithTag(tagName) / postsCount * coefficient);
+        double wight = (double) tagRepository.getTagsByName(tagName).size() / (double) postsCount;
+        Double normWeight = test / postsCount;
+        double coefficient = 1 / normWeight;
+        return wight * coefficient;
     }
 }
