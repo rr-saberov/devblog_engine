@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.response.SingleTagResponse;
 import ru.spring.app.engine.api.response.TagWithCount;
 import ru.spring.app.engine.api.response.TagsResponse;
-import ru.spring.app.engine.entity.Tag;
 import ru.spring.app.engine.repository.TagRepository;
 
 import java.util.ArrayList;
@@ -41,14 +40,19 @@ public class TagService {
                 getTagWeight(tag.getTag()))));
         return singleTagResponses;
     }
-    //todo: use tag2post repo
+
     private Double getTagWeight(String tagName) {
-        Tag mostPopularTag = tagRepository.getTagsOrderByPopularity().get(0);
-        double test = tagRepository.getTagsByName(mostPopularTag.getName()).size();
+        List<TagWithCount> tags = tagRepository.getTagsWithCount().stream().filter(t -> t.getCount() != 0).toList();
+        TagWithCount mostPopularTag = tags.get(0);
+        TagWithCount currentTag = tags.stream().filter(t -> t.getTag().equals(tagName)).toList().get(0);
+        double tagCount = tags.size();
         long postsCount = tagRepository.getPostsCount();
-        double wight = (double) tagRepository.getTagsByName(tagName).size() / (double) postsCount;
-        Double normWeight = test / postsCount;
-        double coefficient = 1 / normWeight;
+        double wight = tags.stream().filter(t -> t.getTag().equals(currentTag.getTag()))
+                .map(TagWithCount::getCount).collect(Collectors.toList()).get(0) / tagCount;
+        double wightMax = (double) tags.stream().filter(t -> t.getTag().equals(mostPopularTag.getTag()))
+                .map(TagWithCount::getCount).collect(Collectors.toList()).get(0) / postsCount;
+
+        double coefficient = 1 / wightMax;
         return wight * coefficient;
     }
 }
