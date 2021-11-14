@@ -42,16 +42,16 @@ public class TagService {
     }
 
     private Double getTagWeight(String tagName) {
-        List<TagWithCount> tags = tagRepository.getTagsWithCount().stream().filter(t -> t.getCount() != 0).toList();
+        List<TagWithCount> tags = tagRepository.getTagsWithCount().stream().toList();
         TagWithCount mostPopularTag = tags.get(0);
-        TagWithCount currentTag = tags.stream().filter(t -> t.getTag().equals(tagName)).toList().get(0);
+        TagWithCount currentTag = tags.stream()
+                .filter(t -> t.getTag().equalsIgnoreCase(tagName)).findFirst().orElseThrow();
         double tagCount = tags.size();
         long postsCount = tagRepository.getPostsCount();
-        double wight = tags.stream().filter(t -> t.getTag().equals(currentTag.getTag()))
-                .map(TagWithCount::getCount).collect(Collectors.toList()).get(0) / tagCount;
-        double wightMax = (double) tags.stream().filter(t -> t.getTag().equals(mostPopularTag.getTag()))
-                .map(TagWithCount::getCount).collect(Collectors.toList()).get(0) / postsCount;
-
+        double wight = tags.stream().filter(t -> t.getTag().equalsIgnoreCase(currentTag.getTag()))
+                .map(TagWithCount::getCount).findFirst().orElseThrow() / tagCount;
+        double wightMax = (double) tags.stream().filter(t -> t.getTag().equalsIgnoreCase(mostPopularTag.getTag()))
+                .map(TagWithCount::getCount).findFirst().orElseThrow() / postsCount;
         double coefficient = 1 / wightMax;
         return wight * coefficient;
     }
