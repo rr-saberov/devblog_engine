@@ -274,8 +274,9 @@ public class PostService {
         userResponse.setName(postRepository.getNameFromPost(post.getUserId()));
         postResponse.setId(post.getId());
         postResponse.setTimestamp(timestamp.getTime());
-        postResponse.setTitle(post.getText());
-        postResponse.setAnnounce(post.getText().substring(8));
+        postResponse.setTitle(post.getTitle());
+        postResponse.setText(post.getText());
+        postResponse.setAnnounce(post.getText());
         postResponse.setLikeCount(postRepository.getVotesForPost(post.getId())
                 .stream().filter(vote -> vote.getValue() == 1).count());
         postResponse.setDislikeCount(postRepository.getVotesForPost(post.getId())
@@ -296,7 +297,8 @@ public class PostService {
         userResponse.setName(postRepository.getNameFromPost(post.getUserId()));
         postResponse.setId(post.getId());
         postResponse.setTimestamp(new Timestamp(post.getTime().toEpochSecond(ZoneOffset.UTC)).getTime());
-        postResponse.setTitle(post.getText());
+        postResponse.setTitle(post.getTitle());
+        postResponse.setText(post.getText());
         postResponse.setLikeCount(postRepository.getVotesForPost(post.getId())
                 .stream().filter(vote -> vote.getValue() == 1).count());
         postResponse.setDislikeCount(postRepository.getVotesForPost(post.getId())
@@ -353,13 +355,13 @@ public class PostService {
         post.setModerationStatus(ModerationStatus.NEW);
         post.setTime(time);
         post.setUserId(userId);
-        postRepository.savePost(request.getIsActive(), request.getText(), time, userId);
+        postRepository.savePost(request.getIsActive(), request.getTitle(), request.getText(), time, userId);
         saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
     }
 
     private void editPostFromRequest(long id, AddPostRequest request) {
         LocalDateTime time = setDateToPost(request);
-        postRepository.updatePost(request.getIsActive(), request.getText(), time, id);
+        postRepository.updatePost(request.getIsActive(), request.getTitle(), request.getText(), time, id);
         saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
     }
 

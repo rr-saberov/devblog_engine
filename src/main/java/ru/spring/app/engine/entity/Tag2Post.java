@@ -1,5 +1,6 @@
 package ru.spring.app.engine.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import javax.persistence.Table;
 @Entity
 @Table
 @NoArgsConstructor
+@AllArgsConstructor
 public class Tag2Post {
 
     @Id
