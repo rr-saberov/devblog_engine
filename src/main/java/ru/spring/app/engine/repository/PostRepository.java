@@ -148,15 +148,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "INSERT INTO posts (is_active, moderation_status, moderator_id, text, time, user_id, view_count) " +
-            "VALUES (:is_active, 'NEW', -1, :text, :time , :id, 0)", nativeQuery = true)
-    void savePost(@Param("is_active") Integer isActive, @Param("text") String text,
+    @Query(value = "INSERT INTO posts (is_active, moderation_status, moderator_id, title, text, time, user_id, view_count) " +
+            "VALUES (:is_active, 'NEW', -1, :title, :text, :time , :id, 0)", nativeQuery = true)
+    void savePost(@Param("is_active") Integer isActive, @Param("title") String title, @Param("text") String text,
                   @Param("time") LocalDateTime time, @Param("id") Long userId);
 
     @Transactional
     @Modifying
-    @Query("UPDATE Post p SET p.isActive = :is_active, p.text = :text, p.time = :time WHERE p.id = :id")
-    void updatePost(@Param("is_active") Integer isActive, @Param("text") String text, @Param("time") LocalDateTime time, @Param("id") long id);
+    @Query("UPDATE Post p SET p.isActive = :is_active, p.title = :title,  p.text = :text, p.time = :time WHERE p.id = :id")
+    void updatePost(@Param("is_active") Integer isActive, @Param("title") String title,
+                    @Param("text") String text, @Param("time") LocalDateTime time, @Param("id") long id);
 
     @Transactional
     @Modifying

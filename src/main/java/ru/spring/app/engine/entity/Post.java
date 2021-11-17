@@ -47,6 +47,9 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime time;
 
+    @Column(nullable = false, columnDefinition = "varchar(255)")
+    private String title;
+
     @Column(nullable = false, columnDefinition = "text")
     private String text;
 

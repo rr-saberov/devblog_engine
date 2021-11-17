@@ -13,6 +13,7 @@ public class CurrentPostResponse {
     @JsonProperty("user")
     private CommentUserResponse userResponse;
     private String title;
+    private String text;
     private long likeCount;
     private long dislikeCount;
     private int viewCount;
