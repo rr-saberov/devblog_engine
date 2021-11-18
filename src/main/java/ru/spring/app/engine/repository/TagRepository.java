@@ -4,12 +4,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.servlet.tags.form.OptionTag;
 import ru.spring.app.engine.api.response.TagWithCount;
 import ru.spring.app.engine.entity.Tag;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
@@ -18,30 +18,13 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 
     List<Tag> getTagsByName(String name);
 
-    @Query(value = "SELECT * " +
-            "FROM tags " +
-            "JOIN tag2post ON tags.id = tag2post.tag_id " +
-            "JOIN posts ON posts.id = tag2post.post_id " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date " +
-            "ORDER BY (SELECT DISTINCT COUNT (*))", nativeQuery = true)
-    List<Tag> getTagsOrderByPopularity();
-
-
     @Query("SELECT new ru.spring.app.engine.api.response.TagWithCount(t.name, size(t.posts)) " +
-            "FROM Tag AS t ORDER BY t.posts.size DESC")
-    List<TagWithCount> getTagsWithCount();
-
-//    @Query("SELECT new com.baeldung.aggregation.model.custom.CommentCount(c.year, COUNT(c.year)) "
-//            + "FROM Comment AS c GROUP BY c.year ORDER BY c.year DESC")
-//    List<CommentCount> countTotalCommentsByYearClass();
-//
-
-    @Query(value = "SELECT COUNT (*) " +
-            "FROM posts " +
-            "JOIN tag2post ON posts.id = tag2post.post_id " +
-            "JOIN tags ON tags.id = tag2post.tag_id " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date AND name = :tag", nativeQuery = true)
-    Long getPostsCountWithTag(@Param("tag") String tag);
+            "FROM Tag AS t " +
+            "JOIN Tag2Post tp ON tp.tagId = t.id " +
+            "JOIN Post p ON tp.postId = p.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' " +
+            "ORDER BY t.posts.size DESC")
+    Set<TagWithCount> getTagsWithCount();
 
     @Query(value = "SELECT COUNT (*) " +
             "FROM posts " +

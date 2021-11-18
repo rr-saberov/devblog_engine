@@ -249,10 +249,10 @@ public class PostService {
 
     private List<AddPostError> addPostErrors(AddPostRequest request) {
         List<AddPostError> errors = new ArrayList<>();
-        if (request.getTitle().isEmpty() || request.getTitle().length() < 5) {
+        if (request.getTitle().isEmpty() || request.getTitle().length() < 3) {
             AddPostError titleError = new AddPostError("title", "Заголовок не установлен");
             errors.add(titleError);
-        } else if (request.getText().isEmpty() || request.getText().length() < 20) {
+        } else if (request.getText().isEmpty() || request.getText().length() < 50) {
             AddPostError textError = new AddPostError("text", "текс слишком короткий");
             errors.add(textError);
         }
@@ -276,7 +276,7 @@ public class PostService {
         postResponse.setTimestamp(timestamp.getTime());
         postResponse.setTitle(post.getTitle());
         postResponse.setText(post.getText());
-        postResponse.setAnnounce(post.getText());
+        postResponse.setAnnounce(post.getText().substring(0, 10));
         postResponse.setLikeCount(postRepository.getVotesForPost(post.getId())
                 .stream().filter(vote -> vote.getValue() == 1).count());
         postResponse.setDislikeCount(postRepository.getVotesForPost(post.getId())
