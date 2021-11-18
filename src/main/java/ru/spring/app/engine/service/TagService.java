@@ -8,7 +8,9 @@ import ru.spring.app.engine.repository.TagRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,10 +31,10 @@ public class TagService {
 
     private List<SingleTagResponse> getSingleTagsResponses(String query) {
         List<SingleTagResponse> singleTagResponses = new ArrayList<>();
-        List<TagWithCount> tagWithCounts;
+        Set<TagWithCount> tagWithCounts;
         if (query != null) {
             tagWithCounts = tagRepository.getTagsWithCount().stream().filter(tag ->
-                    tag.getTag().contains(query)).collect(Collectors.toList());
+                    tag.getTag().contains(query)).collect(Collectors.toSet());
         } else {
             tagWithCounts = tagRepository.getTagsWithCount();
         }
