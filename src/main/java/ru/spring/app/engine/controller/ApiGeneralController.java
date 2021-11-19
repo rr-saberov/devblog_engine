@@ -22,7 +22,7 @@ import ru.spring.app.engine.api.response.EditProfileResponse;
 import ru.spring.app.engine.api.response.InitResponse;
 import ru.spring.app.engine.api.response.SettingsResponse;
 import ru.spring.app.engine.api.response.StatisticsResponse;
-import ru.spring.app.engine.exceptions.AccessIsDeniedException;
+import ru.spring.app.engine.exception.AccessIsDeniedException;
 import ru.spring.app.engine.service.ImageStorage;
 import ru.spring.app.engine.service.PostService;
 import ru.spring.app.engine.service.SettingsService;
