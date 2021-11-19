@@ -20,10 +20,9 @@ import ru.spring.app.engine.api.response.AuthResponse;
 import ru.spring.app.engine.api.response.CaptchaResponse;
 import ru.spring.app.engine.api.response.ChangePasswordResponse;
 import ru.spring.app.engine.api.response.RegistrationResponse;
-import ru.spring.app.engine.exceptions.RegistrationFailedException;
+import ru.spring.app.engine.exception.RegistrationFailedException;
 import ru.spring.app.engine.service.AuthService;
 import ru.spring.app.engine.service.CaptchaService;
-import ru.spring.app.engine.service.EmailService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;

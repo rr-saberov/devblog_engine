@@ -15,13 +15,14 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     Post getPostsById(@Param("id") Long id);
 
-    Post getPostByText(String text);
+    Optional<Post> getPostByText(String text);
 
     @Query(value =
             "SELECT * FROM posts " +

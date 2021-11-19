@@ -15,12 +15,11 @@ import javax.persistence.Table;
 @Entity
 @Table
 @NoArgsConstructor
-@AllArgsConstructor
 public class Tag2Post {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false, columnDefinition = "serial")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "serial")
     private long id;
 
     @Column(name = "post_id", nullable = false)

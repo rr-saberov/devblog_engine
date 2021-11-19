@@ -27,8 +27,9 @@ import ru.spring.app.engine.entity.Tag;
 import ru.spring.app.engine.entity.Tag2Post;
 import ru.spring.app.engine.entity.User;
 import ru.spring.app.engine.entity.enums.ModerationStatus;
-import ru.spring.app.engine.exceptions.AccessIsDeniedException;
-import ru.spring.app.engine.exceptions.PostNotFoundException;
+import ru.spring.app.engine.exception.AccessIsDeniedException;
+import ru.spring.app.engine.exception.AddPostFailException;
+import ru.spring.app.engine.exception.PostNotFoundException;
 import ru.spring.app.engine.repository.PostRepository;
 import ru.spring.app.engine.repository.PostVotesRepository;
 import ru.spring.app.engine.repository.Tag2PostRepository;
@@ -143,7 +144,7 @@ public class PostService {
         }
     }
 
-    public AddPostResponse addNewPost(AddPostRequest request, Principal principal) {
+    public AddPostResponse addNewPost(AddPostRequest request, Principal principal) throws AddPostFailException {
         AddPostResponse response = new AddPostResponse();
         Long userId = userRepository.getUserIdByEmail(principal.getName());
         if (addPostErrors(request).isEmpty()) {
@@ -348,21 +349,26 @@ public class PostService {
         return calendarResponse;
     }
 
-    private void savePostFromRequest(AddPostRequest request, Long userId) {
+    private void savePostFromRequest(AddPostRequest request, Long userId) throws AddPostFailException {
         LocalDateTime time = setDateToPost(request);
         Post post = new Post();
         post.setIsActive(request.getIsActive());
         post.setModerationStatus(ModerationStatus.NEW);
         post.setTime(time);
         post.setUserId(userId);
-        postRepository.savePost(request.getIsActive(), request.getTitle(), request.getText(), time, userId);
-        saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
+        if (postRepository.getPostByText(request.getText()).isEmpty()) {
+            postRepository.savePost(request.getIsActive(), request.getTitle(), request.getText(), time, userId);
+            saveTagsForPost(request, postRepository.getPostByText(request.getText()).get().getId());
+        } else {
+            throw new AddPostFailException("similar post already exists");
+        }
+
     }
 
     private void editPostFromRequest(long id, AddPostRequest request) {
         LocalDateTime time = setDateToPost(request);
         postRepository.updatePost(request.getIsActive(), request.getTitle(), request.getText(), time, id);
-        saveTagsForPost(request, postRepository.getPostByText(request.getText()).getId());
+        saveTagsForPost(request, postRepository.getPostByText(request.getText()).get().getId());
     }
 
     private void saveTagsForPost(AddPostRequest request, Long postId) {

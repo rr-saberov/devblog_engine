@@ -24,8 +24,9 @@ import ru.spring.app.engine.api.response.AddPostResponse;
 import ru.spring.app.engine.api.response.CurrentPostResponse;
 import ru.spring.app.engine.api.response.OkResult;
 import ru.spring.app.engine.api.response.PostsResponse;
-import ru.spring.app.engine.exceptions.AddCommentFailException;
-import ru.spring.app.engine.exceptions.PostNotFoundException;
+import ru.spring.app.engine.exception.AddCommentFailException;
+import ru.spring.app.engine.exception.AddPostFailException;
+import ru.spring.app.engine.exception.PostNotFoundException;
 import ru.spring.app.engine.service.CommentService;
 import ru.spring.app.engine.service.PostService;
 
@@ -117,7 +118,7 @@ public class ApiPostController {
     @PostMapping("/post")
     @Operation(summary = "method to add new post")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<AddPostResponse> addPost(@RequestBody AddPostRequest request, Principal principal) {
+    public ResponseEntity<AddPostResponse> addPost(@RequestBody AddPostRequest request, Principal principal) throws AddPostFailException {
         LOGGER.info("try to add post");
         return ResponseEntity.ok(postService.addNewPost(request, principal));
     }
