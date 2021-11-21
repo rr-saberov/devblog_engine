@@ -251,10 +251,12 @@ public class PostService {
     private List<AddPostError> addPostErrors(AddPostRequest request) {
         List<AddPostError> errors = new ArrayList<>();
         if (request.getTitle().isEmpty() || request.getTitle().length() < 3) {
-            AddPostError titleError = new AddPostError("title", "Заголовок не установлен");
+            AddPostError titleError = new AddPostError();
+            titleError.setTitle("No title set");
             errors.add(titleError);
         } else if (request.getText().isEmpty() || request.getText().length() < 50) {
-            AddPostError textError = new AddPostError("text", "текс слишком короткий");
+            AddPostError textError = new AddPostError();
+            textError.setText("The text is too short ");
             errors.add(textError);
         }
         return errors;
