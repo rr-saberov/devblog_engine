@@ -76,13 +76,8 @@ public class ApiAuthController {
     @PostMapping("/register")
     @Operation(summary = "method to registration new user")
     public ResponseEntity<RegistrationResponse> registration(@RequestBody RegistrationRequest request) throws RegistrationFailedException {
-        if (captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
-            LOGGER.info("try to registration new user");
-            return ResponseEntity.ok(authService.registration(request));
-        } else {
-            LOGGER.error("user entered the wrong captcha");
-            throw new RegistrationFailedException("wrong captcha");
-        }
+        LOGGER.info("try to registration new user");
+        return ResponseEntity.ok(authService.registration(request));
     }
 
     @PostMapping("/restore")
