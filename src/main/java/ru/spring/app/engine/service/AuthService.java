@@ -117,6 +117,11 @@ public class AuthService {
 
     private List<RegistrationProfileError> getErrors(RegistrationRequest request) {
         List<RegistrationProfileError> errors = new ArrayList<>();
+        if (!captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
+            RegistrationProfileError error = new RegistrationProfileError();
+            error.setCaptcha("incorrect captcha entered ");
+            errors.add(error);
+        }
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             RegistrationProfileError error = new RegistrationProfileError();
             error.setEmail("This email is already registered");
