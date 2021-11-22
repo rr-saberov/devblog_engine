@@ -1,5 +1,6 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -42,17 +44,6 @@ public class AuthService {
     private final EmailService emailService;
     private final CaptchaService captchaService;
 
-    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager,
-                       CaptchaRepository captchaRepository, PasswordEncoder passwordEncoder,
-                       GlobalSettingsRepository globalSettingsRepository, EmailService emailService, CaptchaService captchaService) {
-        this.userRepository = userRepository;
-        this.captchaRepository = captchaRepository;
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-        this.globalSettingsRepository = globalSettingsRepository;
-        this.emailService = emailService;
-        this.captchaService = captchaService;
-    }
 
     public AuthResponse login(LoginRequest loginRequest) {
         Authentication auth = authenticationManager.authenticate(

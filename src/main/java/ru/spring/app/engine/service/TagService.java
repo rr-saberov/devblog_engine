@@ -1,5 +1,6 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.response.SingleTagResponse;
 import ru.spring.app.engine.api.response.TagWithCount;
@@ -8,19 +9,15 @@ import ru.spring.app.engine.repository.TagRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TagService {
 
     private final TagRepository tagRepository;
-
-    public TagService(TagRepository tagRepository) {
-        this.tagRepository = tagRepository;
-    }
 
     public TagsResponse getTags(String query) {
         return new TagsResponse(getSingleTagsResponses(query).stream()

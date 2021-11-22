@@ -2,8 +2,8 @@ package ru.spring.app.engine.service;
 
 import com.github.cage.Cage;
 import com.github.cage.GCage;
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.response.CaptchaResponse;
 import ru.spring.app.engine.entity.Captcha;
@@ -13,14 +13,10 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 
 @Service
+@RequiredArgsConstructor
 public class CaptchaService {
 
     private final CaptchaRepository captchaRepository;
-
-    @Autowired
-    public CaptchaService(CaptchaRepository captchaRepository) {
-        this.captchaRepository = captchaRepository;
-    }
 
     public CaptchaResponse generateCaptcha() {
         restoreOldCaptcha();

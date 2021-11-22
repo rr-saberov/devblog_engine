@@ -1,5 +1,6 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.request.SettingsRequest;
 import ru.spring.app.engine.api.response.SettingsResponse;
@@ -10,13 +11,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SettingsService {
 
-    private GlobalSettingsRepository settingsRepository;
-
-    public SettingsService(GlobalSettingsRepository settingsRepository) {
-        this.settingsRepository = settingsRepository;
-    }
+    private final GlobalSettingsRepository settingsRepository;
 
     public SettingsResponse getGlobalSettings() {
         SettingsResponse settingsResponse = new SettingsResponse();
