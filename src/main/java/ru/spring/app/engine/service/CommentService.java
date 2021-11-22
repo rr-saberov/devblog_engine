@@ -1,5 +1,6 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.spring.app.engine.api.request.CommentRequest;
 import ru.spring.app.engine.api.response.AddCommentResponse;
@@ -18,17 +19,12 @@ import java.util.List;
 import java.util.Random;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
 
     private final CommentRepository commentsRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-
-    public CommentService(CommentRepository commentsRepository, PostRepository postRepository, UserRepository userRepository) {
-        this.commentsRepository = commentsRepository;
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-    }
 
     public AddCommentResponse addComment(CommentRequest comment, String email) throws AddCommentFailException {
         List<AddCommentError> errors = addErrorsToList(comment);

@@ -1,5 +1,6 @@
 package ru.spring.app.engine.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +52,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
@@ -59,17 +61,6 @@ public class PostService {
     private final PostVotesRepository postVotesRepository;
     private final Tag2PostRepository tag2PostRepository;
     private final SettingsService settingsService;
-
-    public PostService(PostRepository postRepository, UserRepository userRepository,
-                       TagRepository tagRepository, PostVotesRepository postVotesRepository,
-                       Tag2PostRepository tag2PostRepository, SettingsService settingsService) {
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.tagRepository = tagRepository;
-        this.postVotesRepository = postVotesRepository;
-        this.tag2PostRepository = tag2PostRepository;
-        this.settingsService = settingsService;
-    }
 
     public PostsResponse getPosts(Integer offset, Integer limit, String mode) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);

@@ -2,6 +2,7 @@ package ru.spring.app.engine.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,7 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 @Tag(name = "api general controller")
 public class ApiGeneralController {
 
@@ -41,15 +43,6 @@ public class ApiGeneralController {
     private final InitResponse initResponse;
     private final ImageStorage storage;
     private final UserService userService;
-
-    public ApiGeneralController(SettingsService settingsService, PostService postService,
-                                InitResponse initResponse, ImageStorage storage, UserService userService) {
-        this.settingsService = settingsService;
-        this.postService = postService;
-        this.initResponse = initResponse;
-        this.storage = storage;
-        this.userService = userService;
-    }
 
     @GetMapping("/init")
     @Operation(summary = "init method")

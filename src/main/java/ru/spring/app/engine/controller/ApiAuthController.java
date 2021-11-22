@@ -2,6 +2,7 @@ package ru.spring.app.engine.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,17 +31,13 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 @Tag(name = "auth controller")
 public class ApiAuthController {
 
     private static final Logger LOGGER = LogManager.getLogger(ApiAuthController.class);
     private final AuthService authService;
     private final CaptchaService captchaService;
-
-    public ApiAuthController(AuthService authService, CaptchaService captchaService) {
-        this.authService = authService;
-        this.captchaService = captchaService;
-    }
 
     @PostMapping("/login")
     @Operation(summary = "method to login")

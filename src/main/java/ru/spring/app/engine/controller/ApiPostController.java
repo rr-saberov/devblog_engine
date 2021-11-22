@@ -2,6 +2,7 @@ package ru.spring.app.engine.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,17 +36,13 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 @Tag(name = "post controller for rest api")
 public class ApiPostController {
 
     private static final Logger LOGGER = LogManager.getLogger(ApiPostController.class);
     private final PostService postService;
     private final CommentService commentsService;
-
-    public ApiPostController(PostService postService, CommentService commentsService) {
-        this.postService = postService;
-        this.commentsService = commentsService;
-    }
 
     @GetMapping("/post")
     @Operation(summary = "method to get all posts")
