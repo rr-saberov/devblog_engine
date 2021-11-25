@@ -26,9 +26,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
             "ORDER BY t.posts.size DESC")
     Set<TagWithCount> getTagsWithCount();
 
-    @Query(value = "SELECT COUNT (*) " +
-            "FROM posts " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date", nativeQuery = true)
+    @Query("SELECT count (p) " +
+            "FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= current_date")
     Long getPostsCount();
 
 }
