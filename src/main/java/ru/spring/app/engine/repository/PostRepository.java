@@ -181,7 +181,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = -1", nativeQuery = true)
     long getTotalDislikesCount();
 
-    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = -1 AND user_id = :id", nativeQuery = true)
+//    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = -1 AND user_id = :id", nativeQuery = true)
+    @Query("SELECT COUNT (pv.id) FROM PostVotes pv WHERE pv.value = -1 AND pv.userId = :id")
     long getDislikesCountForUserPosts(@Param("id") Long id);
 
     @Query("SELECT p FROM Post p ORDER BY p.time")
