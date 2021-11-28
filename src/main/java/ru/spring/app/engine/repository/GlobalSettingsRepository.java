@@ -12,9 +12,7 @@ import javax.transaction.Transactional;
 @Repository
 public interface GlobalSettingsRepository extends JpaRepository<GlobalSettings, Long> {
 
-    @Query("SELECT gs " +
-            "FROM GlobalSettings gs " +
-            "WHERE gs.code = 'MULTIUSER_MODE'")
+    @Query("SELECT gs FROM GlobalSettings gs WHERE gs.code = 'MULTIUSER_MODE'")
     GlobalSettings getMultiuserMode();
 
     @Transactional

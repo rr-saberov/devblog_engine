@@ -14,13 +14,14 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table
+@AllArgsConstructor
 @NoArgsConstructor
 public class Tag2Post {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(columnDefinition = "serial")
-    private long id;
+    private Long id;
 
     @Column(name = "post_id", nullable = false)
     private Long postId;
@@ -28,8 +29,4 @@ public class Tag2Post {
     @Column(name = "tag_id", nullable = false)
     private long tagId;
 
-    public Tag2Post(Long postId, long tagId) {
-        this.postId = postId;
-        this.tagId = tagId;
-    }
 }
