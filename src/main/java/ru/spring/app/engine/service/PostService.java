@@ -23,6 +23,7 @@ import ru.spring.app.engine.api.response.enums.ResultStatus;
 import ru.spring.app.engine.api.response.enums.UserPostsStatus;
 import ru.spring.app.engine.api.response.errors.AddPostError;
 import ru.spring.app.engine.entity.Post;
+import ru.spring.app.engine.entity.PostComments;
 import ru.spring.app.engine.entity.PostVotes;
 import ru.spring.app.engine.entity.Tag;
 import ru.spring.app.engine.entity.Tag2Post;
@@ -307,18 +308,18 @@ public class PostService {
 
     private List<CommentResponse> convertPostCommentsToResponse(Long postId) {
         List<CommentResponse> responses = new ArrayList<>();
-        postRepository.getCommentsForPost(postId).forEach(postComments -> {
-            User currentUser = userRepository.getUsersById(postComments.getUserId());
+        for (PostComments pc : postRepository.getCommentsForPost(postId)) {
+            User currentUser = userRepository.getUsersById(pc.getUserId());
             CommentResponse commentResponse = new CommentResponse();
-            commentResponse.setId(postComments.getId());
-            commentResponse.setText(postComments.getText());
-            commentResponse.setTimestamp(postComments.getTime().toEpochSecond(ZoneOffset.UTC));
+            commentResponse.setId(pc.getId());
+            commentResponse.setText(pc.getText());
+            commentResponse.setTimestamp(pc.getTime().toEpochSecond(ZoneOffset.UTC));
             commentResponse.setUser(new UserResponse(
                     currentUser.getId(),
                     currentUser.getName(),
                     currentUser.getPhoto()));
             responses.add(commentResponse);
-        });
+        }
         return responses;
     }
 
@@ -344,18 +345,12 @@ public class PostService {
 
     private void savePostFromRequest(AddPostRequest request, Long userId) throws AddPostFailException {
         LocalDateTime time = setDateToPost(request);
-        Post post = new Post();
-        post.setIsActive(request.getIsActive());
-        post.setModerationStatus(ModerationStatus.NEW);
-        post.setTime(time);
-        post.setUserId(userId);
         if (postRepository.getPostByText(request.getText()).isEmpty()) {
             postRepository.savePost(request.getIsActive(), request.getTitle(), request.getText(), time, userId);
             saveTagsForPost(request, postRepository.getPostByText(request.getText()).get().getId());
         } else {
             throw new AddPostFailException("similar post already exists");
         }
-
     }
 
     private void editPostFromRequest(long id, AddPostRequest request) {
@@ -368,10 +363,10 @@ public class PostService {
         List<String> requestTags = request.getTags();
         for (String t: requestTags) {
             if (tagRepository.getTagByName(t).isEmpty()) {
-                tagRepository.save(new Tag(t));
+                tagRepository.save(new Tag(null, t));
             }
             long tagId = tagRepository.getTagByName(t).get().getId();
-            tag2PostRepository.save(new Tag2Post(postId, tagId));
+            tag2PostRepository.save(new Tag2Post(null, postId, tagId));
         }
     }
 

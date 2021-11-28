@@ -34,8 +34,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> getPostsPerDay(@Param("day") Integer day, @Param("month") Integer month,
                               @Param("year") Integer year, Pageable pageable);
 
-    @Query("SELECT p " +
-            "FROM Post p " +
+    @Query("SELECT p FROM Post p " +
             "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
             "ORDER BY p.postComments.size DESC")
     Page<Post> getPostsOrderByCommentCount(Pageable pageable);
@@ -108,15 +107,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND email = :email", nativeQuery = true)
     Page<Post> getPublishedPostsByUser(Pageable pageable, @Param("email") String email);
 
-    @Query("SELECT pv " +
-            "FROM PostVotes pv " +
-            "WHERE pv.postId = :id")
+    @Query("SELECT pv FROM PostVotes pv WHERE pv.postId = :id")
     List<PostVotes> getVotesForPost(@Param("id") Long id);
 
-    @Query(value = "SELECT DISTINCT name " +
-            "FROM users " +
-            "LEFT JOIN posts on posts.user_id = users.id " +
-            "WHERE users.id = :id ", nativeQuery = true)
+    @Query("SELECT DISTINCT u.name " +
+            "FROM User u LEFT JOIN Post p ON p.userId = u.id WHERE u.id = :id")
     String getNameFromPost(@Param("id") Long id);
 
     @Query("SELECT pc FROM PostComments pc WHERE pc.postId = :id")
@@ -166,22 +161,21 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             nativeQuery = true)
     void updatePostStatus(@Param("moderation_status") String moderationStatus, @Param("id") Long postId);
 
-    @Query(value = "SELECT SUM (view_count) FROM posts", nativeQuery = true)
+    @Query("SELECT SUM (p.viewCount) FROM Post p")
     long getTotalViewCount();
 
-    @Query(value = "SELECT SUM (view_count) FROM posts WHERE user_id = :id", nativeQuery = true)
+    @Query("SELECT SUM (p.viewCount) FROM Post p WHERE p.userId = :id")
     long getViewCountOnUserPosts(@Param("id") Long id);
 
-    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = 1", nativeQuery = true)
+    @Query("SELECT COUNT (pv.id) FROM PostVotes pv WHERE pv.value = 1")
     long getTotalLikesCount();
 
-    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = 1 AND user_id = :id", nativeQuery = true)
+    @Query("SELECT COUNT (pv.id) FROM PostVotes pv WHERE pv.value = 1 AND pv.userId = :id")
     long getLikesCountForUserPosts(@Param("id") Long id);
 
-    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = -1", nativeQuery = true)
+    @Query("SELECT COUNT (pv.id) FROM PostVotes pv WHERE pv.value = -1")
     long getTotalDislikesCount();
 
-//    @Query(value = "SELECT COUNT(id) FROM post_votes WHERE value = -1 AND user_id = :id", nativeQuery = true)
     @Query("SELECT COUNT (pv.id) FROM PostVotes pv WHERE pv.value = -1 AND pv.userId = :id")
     long getDislikesCountForUserPosts(@Param("id") Long id);
 

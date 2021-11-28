@@ -2,7 +2,6 @@ package ru.spring.app.engine.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.spring.app.engine.api.response.TagWithCount;
 import ru.spring.app.engine.entity.Tag;
@@ -19,11 +18,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     List<Tag> getTagsByName(String name);
 
     @Query("SELECT new ru.spring.app.engine.api.response.TagWithCount(t.name, size(t.posts)) " +
-            "FROM Tag AS t " +
-            "JOIN Tag2Post tp ON tp.tagId = t.id " +
-            "JOIN Post p ON tp.postId = p.id " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' " +
-            "ORDER BY t.posts.size DESC")
+            "FROM Tag AS t JOIN Tag2Post tp ON tp.tagId = t.id JOIN Post p ON tp.postId = p.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' ORDER BY t.posts.size DESC")
     Set<TagWithCount> getTagsWithCount();
 
     @Query("SELECT count (p) " +
