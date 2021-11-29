@@ -20,19 +20,13 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    Post getPostsById(@Param("id") Long id);
+    Post getPostById(@Param("id") Long id);
 
     Optional<Post> getPostByText(String text);
 
-    @Query(value =
-            "SELECT * FROM posts " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= CURRENT_DATE " +
-            "AND EXTRACT (DAY from time) = :day " +
-            "AND EXTRACT (MONTH from time) = :month " +
-            "AND EXTRACT (YEAR from time) = :year " +
-            "ORDER BY time DESC ", nativeQuery = true)
-    Page<Post> getPostsPerDay(@Param("day") Integer day, @Param("month") Integer month,
-                              @Param("year") Integer year, Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
+            "ORDER BY p.time DESC")
+    List<Post> getPosts();
 
     @Query("SELECT p FROM Post p " +
             "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
@@ -55,18 +49,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "ORDER BY p.time")
     Page<Post> getOldPostsOrderByTime(Pageable pageable);
 
-    @Query(value = "SELECT * " +
-            "FROM posts " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date " +
-            "AND text LIKE %:query% " +
-            "ORDER BY time DESC", nativeQuery = true)
+    @Query("SELECT p FROM Post p " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE AND p.text LIKE %:query% " +
+            "ORDER BY p.time DESC")
     Page<Post> searchInText(@Param("query") String query, Pageable pageable);
 
-    @Query(value = "SELECT * FROM posts " +
-            "JOIN tag2post ON posts.id = tag2post.post_id " +
-            "JOIN tags ON tags.id = tag2post.tag_id " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' " +
-            "AND time <= current_date AND name = :tag", nativeQuery = true)
+    @Query("SELECT p FROM Post p " +
+            "JOIN Tag2Post tp ON p.id = tp.postId " +
+            "JOIN Tag t ON t.id = tp.tagId " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE AND t.name = :tag")
     Page<Post> getPostsWithTag(@Param("tag") String tag, Pageable nextPage);
 
     @Query("SELECT p " +
@@ -87,24 +78,24 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "ORDER BY p.time DESC")
     Page<Post> getDeclinedPosts(Pageable pageable);
 
-    @Query(value = "SELECT * FROM posts " +
-            "LEFT JOIN users on posts.user_id = users.id " +
-            "WHERE is_active = -1 and email = :email", nativeQuery = true)
+    @Query("SELECT p FROM  Post p " +
+            "JOIN User u ON p.userId = u.id " +
+            "WHERE p.isActive = -1 AND u.email = :email")
     Page<Post> getInactivePostsByUser(Pageable pageable, @Param("email") String email);
 
-    @Query(value = "SELECT * FROM posts " +
-            "LEFT JOIN users on posts.user_id = users.id " +
-            "WHERE is_active = 1 AND moderation_status = 'NEW' AND email = :email", nativeQuery = true)
+    @Query("SELECT p FROM Post p " +
+            "JOIN User u ON p.userId = u.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'NEW' AND u.email = :email")
     Page<Post> getPendingPostsByUser(Pageable pageable, @Param("email") String email);
 
-    @Query(value = "SELECT * FROM posts\n" +
-            "LEFT JOIN users on posts.user_id = users.id " +
-            "WHERE is_active = 1 AND moderation_status = 'DECLINED' AND email = :email", nativeQuery = true)
+    @Query("SELECT p FROM Post p " +
+            "JOIN User u ON p.userId = u.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'DECLINED' AND u.email = :email")
     Page<Post> getDeclinedPostsByUser(Pageable pageable, @Param("email") String email);
 
-    @Query(value = "SELECT * FROM posts " +
-            "LEFT JOIN users on posts.user_id = users.id " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND email = :email", nativeQuery = true)
+    @Query("SELECT p FROM Post p " +
+            "JOIN User u ON p.userId = u.id " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND u.email = :email")
     Page<Post> getPublishedPostsByUser(Pageable pageable, @Param("email") String email);
 
     @Query("SELECT pv FROM PostVotes pv WHERE pv.postId = :id")

@@ -2,6 +2,7 @@ package ru.spring.app.engine.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -107,8 +108,11 @@ public class PostService {
     public PostsResponse getPostsOnDay(Integer offset, Integer limit, LocalDate date) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
         PostsResponse postsResponse = new PostsResponse();
-        Page<Post> postsPage =
-                postRepository.getPostsPerDay(date.getDayOfMonth(), date.getMonthValue(), date.getYear(), nextPage);
+        List<Post> posts = postRepository.getPosts().stream()
+                .filter(p -> p.getTime().getYear() == date.getYear()
+                        && p.getTime().getMonthValue() == date.getMonthValue()
+                        && p.getTime().getDayOfMonth() == date.getDayOfMonth()).collect(Collectors.toList());
+        Page<Post> postsPage = new PageImpl<>(posts, nextPage, posts.size());
         postsResponse.setCount(postsPage.getTotalElements());
         postsResponse.setPosts(postsPage.get().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
         return postsResponse;
@@ -129,8 +133,8 @@ public class PostService {
 
     public CurrentPostResponse getPostById(Long id) throws PostNotFoundException {
         if (postRepository.findById(id).isPresent()) {
-            postRepository.updatePostInfo(postRepository.getPostsById(id).getViewCount() + 1, id);
-            return convertPostToCurrentPostResponse(postRepository.getPostsById(id));
+            postRepository.updatePostInfo(postRepository.getPostById(id).getViewCount() + 1, id);
+            return convertPostToCurrentPostResponse(postRepository.getPostById(id));
         } else {
             throw new PostNotFoundException("post with id: " + id + " not found");
         }
@@ -194,6 +198,10 @@ public class PostService {
             postVotesRepository.changeDislikeToLike(currentUser.get().getId(), request.getPostId());
             return new OkResult(ResultStatus.TRUE);
         } else if (currentUser.isPresent() && !isPostHasUserLike(request.getPostId(), currentUser.get().getId())) {
+//            PostVotes postVotes = new PostVotes(request.getPostId(), LocalDate.now(), currentUser.get().getId(), 1);
+//            postVotes.setPostId(request.getPostId());
+//            postVotes.setTime(LocalDate.now());
+//            postVotes.setUserId();
             postVotesRepository.addLike(request.getPostId(), LocalDate.now(), currentUser.get().getId());
             return new OkResult(ResultStatus.TRUE);
         } else {
