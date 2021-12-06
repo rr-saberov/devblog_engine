@@ -3,7 +3,6 @@
     <changeSet id="14434343333" author="Ruslan">
 
         <insert tableName="post_comments">
-            <column name="id" value="1"/>
             <column name="parent_id" value="1"/>
             <column name="post_id" value="1"/>
             <column name="text" value="text"/>
@@ -12,12 +11,10 @@
         </insert>
 
         <insert tableName="tags">
-            <column name="id" value="1"/>
             <column name="name" value="tag name"/>
         </insert>
 
         <insert tableName="post_comments">
-            <column name="id" value="2"/>
             <column name="parent_id" value="1"/>
             <column name="post_id" value="1"/>
             <column name="text" value="text"/>
@@ -71,7 +68,6 @@
         </insert>
 
         <insert tableName="tag2post">
-            <column name="id" value="1"/>
             <column name="post_id" value="1"/>
             <column name="tag_id" value="1"/>
         </insert>

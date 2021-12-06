@@ -119,7 +119,7 @@
             <column name="secret_code" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="time" type="DATE">
+            <column name="time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -154,7 +154,7 @@
             <column name="text" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="time" type="DATE">
+            <column name="time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="user_id" type="INTEGER">
@@ -170,7 +170,7 @@
             <column name="post_id" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
-            <column name="time" type="DATE">
+            <column name="time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="user_id" type="INTEGER">
@@ -201,7 +201,7 @@
             <column name="text" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="time" type="DATE">
+            <column name="time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="user_id" type="INTEGER">
@@ -254,7 +254,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="photo" type="TEXT"/>
-            <column name="reg_time" type="DATE">
+            <column name="reg_time" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>

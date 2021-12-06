@@ -3,62 +3,51 @@
     <changeSet id="14434343333" author="Ruslan">
 
         <insert tableName="tags">
-            <column name="id" value="2"/>
             <column name="name" value="java"/>
         </insert>
 
         <insert tableName="tags">
-            <column name="id" value="3"/>
             <column name="name" value="C++"/>
         </insert>
 
         <insert tableName="tags">
-            <column name="id" value="4"/>
             <column name="name" value="Kotlin"/>
         </insert>
 
         <insert tableName="tags">
-            <column name="id" value="5"/>
             <column name="name" value="Golang"/>
         </insert>
 
         <insert tableName="tags">
-            <column name="id" value="6"/>
             <column name="name" value="TypeScript"/>
         </insert>
 
         <insert tableName="tag2post">
-            <column name="id" value="2"/>
             <column name="post_id" value="3"/>
             <column name="tag_id" value="2"/>
         </insert>
 
         <insert tableName="tag2post">
-            <column name="id" value="3"/>
             <column name="post_id" value="5"/>
             <column name="tag_id" value="2"/>
         </insert>
 
         <insert tableName="tag2post">
-            <column name="id" value="4"/>
             <column name="post_id" value="4"/>
             <column name="tag_id" value="3"/>
         </insert>
 
         <insert tableName="tag2post">
-            <column name="id" value="5"/>
             <column name="post_id" value="6"/>
             <column name="tag_id" value="4"/>
         </insert>
 
         <insert tableName="tag2post">
-            <column name="id" value="6"/>
             <column name="post_id" value="7"/>
             <column name="tag_id" value="5"/>
         </insert>
 
         <insert tableName="tag2post">
-            <column name="id" value="7"/>
             <column name="post_id" value="8"/>
             <column name="tag_id" value="6"/>
         </insert>

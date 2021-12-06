@@ -41,7 +41,7 @@ public class TagService {
     }
 
     private Double getTagWeight(String tagName) {
-        List<TagWithCount> tags = tagRepository.getTagsWithCount().stream().toList();
+        List<TagWithCount> tags = new ArrayList<>(tagRepository.getTagsWithCount());
         TagWithCount mostPopularTag = tags.get(0);
         TagWithCount currentTag = tags.stream()
                 .filter(t -> t.getTag().equalsIgnoreCase(tagName)).findFirst().orElseThrow();
