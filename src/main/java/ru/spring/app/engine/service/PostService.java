@@ -198,10 +198,6 @@ public class PostService {
             postVotesRepository.changeDislikeToLike(currentUser.get().getId(), request.getPostId());
             return new OkResult(ResultStatus.TRUE);
         } else if (currentUser.isPresent() && !isPostHasUserLike(request.getPostId(), currentUser.get().getId())) {
-//            PostVotes postVotes = new PostVotes(request.getPostId(), LocalDate.now(), currentUser.get().getId(), 1);
-//            postVotes.setPostId(request.getPostId());
-//            postVotes.setTime(LocalDate.now());
-//            postVotes.setUserId();
             postVotesRepository.addLike(request.getPostId(), LocalDate.now(), currentUser.get().getId());
             return new OkResult(ResultStatus.TRUE);
         } else {
@@ -279,7 +275,7 @@ public class PostService {
         postResponse.setTimestamp(timestamp.getTime());
         postResponse.setTitle(post.getTitle());
         postResponse.setText(post.getText());
-        postResponse.setAnnounce(post.getText().substring(0, 10));
+        postResponse.setAnnounce(createAnnounce(post.getText()));
         postResponse.setLikeCount(postRepository.getVotesForPost(post.getId())
                 .stream().filter(vote -> vote.getValue() == 1).count());
         postResponse.setDislikeCount(postRepository.getVotesForPost(post.getId())
@@ -288,6 +284,15 @@ public class PostService {
         postResponse.setViewCount(post.getViewCount());
         postResponse.setUserResponse(userResponse);
         return postResponse;
+    }
+
+    private String createAnnounce(String text) {
+        StringBuilder builder = new StringBuilder();
+        String[] words = text.split(" ");
+        for (int i = 0; i < 10; i++) {
+            builder.append(words[i]).append(" ");
+        }
+        return builder.toString();
     }
 
     private CurrentPostResponse convertPostToCurrentPostResponse(Post post) {
