@@ -47,6 +47,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -288,8 +289,10 @@ public class PostService {
 
     private String createAnnounce(String text) {
         StringBuilder builder = new StringBuilder();
-        String[] words = text.split(" ");
+        String[] words = text.split(" ").length > 10 ?
+                text.split(" ") : (String[]) List.of(text.substring(0, 10)).toArray();
         for (int i = 0; i < 10; i++) {
+            words[i].replaceAll("\\<.+\\>", "");
             builder.append(words[i]).append(" ");
         }
         return builder.toString();
