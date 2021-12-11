@@ -47,7 +47,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -292,7 +291,7 @@ public class PostService {
         String[] words = text.split(" ").length > 10 ?
                 text.split(" ") : (String[]) List.of(text.substring(0, 10)).toArray();
         for (int i = 0; i < 10; i++) {
-            words[i].replaceAll("\\<.+\\>", "");
+            words[i].replaceAll("\\<.+/\\>", " ");
             builder.append(words[i]).append(" ");
         }
         return builder.toString();
@@ -377,7 +376,7 @@ public class PostService {
 
     private void saveTagsForPost(AddPostRequest request, Long postId) {
         List<String> requestTags = request.getTags();
-        for (String t: requestTags) {
+        for (String t : requestTags) {
             if (tagRepository.getTagByName(t).isEmpty()) {
                 tagRepository.save(new Tag(null, t));
             }
@@ -387,12 +386,9 @@ public class PostService {
     }
 
     private LocalDateTime setDateToPost(AddPostRequest request) {
-        LocalDateTime date = LocalDateTime.now();
-        if (LocalDateTime.now().isAfter(
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getTimestamp()), ZoneId.systemDefault()))) {
-            date = LocalDateTime
-                    .ofInstant(Instant.ofEpochMilli(request.getTimestamp() * 1000), ZoneId.systemDefault());
-        }
-        return date;
+        return LocalDateTime.now()
+                .isAfter(LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getTimestamp()), ZoneId.systemDefault())) ?
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getTimestamp() * 1000), ZoneId.systemDefault()) :
+                LocalDateTime.now();
     }
 }
