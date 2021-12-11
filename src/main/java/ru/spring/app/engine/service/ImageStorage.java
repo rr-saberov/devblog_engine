@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.spring.app.engine.exception.ImageUploadException;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,10 @@ public class ImageStorage {
     @Value("${upload.path}")
     String uploadPath;
 
-    public String updateUserImage(MultipartFile file) throws IOException {
+    public String updateUserImage(MultipartFile file) throws IOException, ImageUploadException {
+        if (!file.getContentType().equals("image/jpeg")) {
+            throw new ImageUploadException("wrong file type");
+        }
         String resourceURI = null;
         RandomString random = new RandomString(4);
         String path = uploadPath + "/" + random.nextString() + "/" + random.nextString();
