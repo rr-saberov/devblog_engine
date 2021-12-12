@@ -4,8 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,41 +28,41 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.security.Principal;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Tag(name = "auth controller")
 public class ApiAuthController {
 
-    private static final Logger LOGGER = LogManager.getLogger(ApiAuthController.class);
     private final AuthService authService;
     private final CaptchaService captchaService;
 
     @PostMapping("/login")
     @Operation(summary = "method to login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
-        LOGGER.info("trying to login");
+        log.info("trying to login");
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @GetMapping("/check")
     @Operation(summary = "method to check the current session")
     public ResponseEntity<AuthResponse> check(Principal principal) {
-        LOGGER.info("checking the current user session");
+        log.info("checking the current user session");
         return ResponseEntity.ok(authService.check(principal));
     }
 
     @GetMapping("/captcha")
     @Operation(summary = "method to generate captcha")
     public ResponseEntity<CaptchaResponse> captcha() {
-        LOGGER.info("generate new captcha");
+        log.info("generate new captcha");
         return ResponseEntity.ok(captchaService.generateCaptcha());
     }
 
     @GetMapping("/logout")
     @Operation(summary = "method to logout")
     public ResponseEntity<Boolean> logout(HttpServletRequest request) {
-        LOGGER.info("ending the current user session");
+        log.info("ending the current user session");
         HttpSession session = request.getSession();
         SecurityContextHolder.clearContext();
         session.invalidate();
@@ -73,14 +72,14 @@ public class ApiAuthController {
     @PostMapping("/register")
     @Operation(summary = "method to registration new user")
     public ResponseEntity<RegistrationResponse> registration(@RequestBody RegistrationRequest request) throws RegistrationFailedException {
-        LOGGER.info("try to registration new user");
+        log.info("try to registration new user");
         return ResponseEntity.ok(authService.registration(request));
     }
 
     @PostMapping("/restore")
     @Operation(summary = "method to restore password")
     public ResponseEntity<Boolean> restore(@RequestBody RestoreRequest response) {
-        LOGGER.info("restore users password");
+        log.info("restore users password");
         Boolean result = authService.restore(response);
         return ResponseEntity.ok(result);
     }
@@ -89,7 +88,7 @@ public class ApiAuthController {
     @SneakyThrows
     @Operation(summary = "method to change password")
     public ResponseEntity<ChangePasswordResponse> changePassword(@RequestBody ChangePasswordRequest request) {
-        LOGGER.info("user attempt to change password");
+        log.info("user attempt to change password");
         return ResponseEntity.ok(authService.changePassword(request));
     }
 }

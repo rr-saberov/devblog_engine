@@ -3,8 +3,7 @@ package ru.spring.app.engine.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,13 +33,13 @@ import ru.spring.app.engine.service.PostService;
 import java.security.Principal;
 import java.time.LocalDate;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Tag(name = "post controller for rest api")
 public class ApiPostController {
 
-    private static final Logger LOGGER = LogManager.getLogger(ApiPostController.class);
     private final PostService postService;
     private final CommentService commentsService;
 
@@ -81,7 +80,7 @@ public class ApiPostController {
     @GetMapping("/post/{ID}")
     @Operation(summary = "method to get post by id")
     public ResponseEntity<CurrentPostResponse> postById(@PathVariable(value = "ID") Long id) throws PostNotFoundException {
-        LOGGER.info("try to get post by id");
+        log.info("try to get post by id");
         return ResponseEntity.ok(postService.getPostById(id));
     }
 
@@ -116,7 +115,7 @@ public class ApiPostController {
     @Operation(summary = "method to add new post")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddPostResponse> addPost(@RequestBody AddPostRequest request, Principal principal) throws AddPostFailException {
-        LOGGER.info("try to add post");
+        log.info("try to add post");
         return ResponseEntity.ok(postService.addNewPost(request, principal));
     }
 
@@ -124,7 +123,7 @@ public class ApiPostController {
     @Operation(summary = "method to update post")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddPostResponse> updatePost(@PathVariable("ID") Long id, @RequestBody AddPostRequest request) {
-        LOGGER.info("try to change post");
+        log.info("try to change post");
         return ResponseEntity.ok(postService.updatePost(id, request));
     }
 
@@ -133,7 +132,7 @@ public class ApiPostController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddCommentResponse> addComment(@RequestBody CommentRequest comment,
                                                          Principal principal) throws AddCommentFailException {
-        LOGGER.info("try to add comment");
+        log.info("try to add comment");
         return ResponseEntity.ok(commentsService.addComment(comment, principal.getName()));
     }
 
