@@ -1,9 +1,8 @@
 package ru.spring.app.engine.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.utility.RandomString;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,10 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Slf4j
 @Service
 public class ImageStorage {
-
-    private final static Logger LOGGER = LogManager.getLogger(ImageStorage.class);
 
     @Value("${upload.path}")
     String uploadPath;
@@ -34,7 +32,7 @@ public class ImageStorage {
         if (!file.isEmpty()) {
             if (!new File(path).exists()) {
                 Files.createDirectories(Paths.get(path));
-                LOGGER.info("create image folder in " + path);
+                log.info("create image folder in " + path);
             }
 
             String fileName = random.nextString() + random.nextString()
@@ -42,7 +40,7 @@ public class ImageStorage {
             Path imagePath = Paths.get(path, fileName);
             resourceURI = "/upload/" + fileName;
             file.transferTo(imagePath);
-            LOGGER.info(fileName + " uploaded OK!");
+            log.info(fileName + " uploaded OK!");
         }
 
         return resourceURI;
