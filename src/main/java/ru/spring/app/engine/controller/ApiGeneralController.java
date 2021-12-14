@@ -75,7 +75,7 @@ public class ApiGeneralController {
     @PreAuthorize("hasAuthority('user:write')")
     public String saveImage(@RequestPart MultipartFile image) {
         log.info("try to upload image");
-        String savePath = storage.updateUserImage(image);
+        String savePath = storage.uploadImageFile(image);
         return (savePath);
     }
 
@@ -84,15 +84,15 @@ public class ApiGeneralController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<EditProfileResponse> editProfile(@RequestParam String name,
                                                            @RequestParam String email,
-                                                           @RequestParam String password,
-                                                           @RequestParam Integer removePhoto,
-                                                           @RequestPart(name = "photo") MultipartFile photo,
+                                                           @RequestParam(required = false) String password,
+                                                           @RequestParam(required = false) Integer removePhoto,
+                                                           @RequestPart(name = "photo", required = false) MultipartFile photo,
                                                            Principal principal) {
         log.info("try to change user profile");
         return ResponseEntity.ok(userService.editProfile(name, email, password, removePhoto, photo, principal));
     }
 
-    @GetMapping("/statistics/my") 
+    @GetMapping("/statistics/my")
     @Operation(summary = "method to get users statistics")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<StatisticsResponse> getMyStatistics(Principal principal) {
@@ -104,6 +104,6 @@ public class ApiGeneralController {
     @PreAuthorize("hasAuthority('user:moderate')")
     public ResponseEntity<StatisticsResponse> getStatistics(Principal principal) throws AccessIsDeniedException {
         log.info("try to view statistics");
-            return ResponseEntity.ok(postService.getStatistics(principal.getName()));
+        return ResponseEntity.ok(postService.getStatistics(principal.getName()));
     }
 }

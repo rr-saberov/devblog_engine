@@ -21,20 +21,18 @@ public class ImageStorage {
     @Value("${upload.path}")
     String uploadPath;
 
-    public String updateUserImage(MultipartFile file) throws IOException, ImageUploadException {
+    public String uploadImageFile(MultipartFile file) throws IOException, ImageUploadException {
         if (!file.getContentType().equals("image/jpeg")) {
             throw new ImageUploadException("wrong file type");
         }
         String resourceURI = null;
         RandomString random = new RandomString(4);
         String path = uploadPath + "/" + random.nextString() + "/" + random.nextString();
-
         if (!file.isEmpty()) {
             if (!new File(path).exists()) {
                 Files.createDirectories(Paths.get(path));
                 log.info("create image folder in " + path);
             }
-
             String fileName = random.nextString() + random.nextString()
                     + "." + FilenameUtils.getExtension(file.getOriginalFilename());
             Path imagePath = Paths.get(path, fileName);
@@ -42,7 +40,6 @@ public class ImageStorage {
             file.transferTo(imagePath);
             log.info(fileName + " uploaded OK!");
         }
-
         return resourceURI;
     }
 }
