@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -24,7 +25,7 @@ public class ImageStorage {
     String uploadPath;
 
     public String uploadImageFile(MultipartFile file) throws IOException, ImageUploadException {
-        if (file.getContentType().equals("image/jpeg")) {
+        if (Objects.equals(file.getContentType(), "image/jpeg")) {
             String resourceURI = null;
             RandomString random = new RandomString(4);
             String path = "/" + random.nextString() + "/" + random.nextString();
@@ -44,7 +45,7 @@ public class ImageStorage {
     }
 
     public String uploadUserPhoto(MultipartFile file) throws IOException, ImageUploadException {
-        if (file.getContentType().equals("image/jpeg")) {
+        if (Objects.equals(file.getContentType(), "image/jpeg")) {
             String resourceURI = null;
             RandomString random = new RandomString(4);
             String path = uploadPath + "/" + random.nextString() + "/" + random.nextString();

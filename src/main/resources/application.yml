@@ -24,10 +24,6 @@ spring:
           auth: true
           ssl:
             enable: true
-  mvc:
-#    static-path-pattern: classpath:/resources/**
-      resources:
-            static-locations: classpath:/resources/upload/**
 liquibase:
   change-log: classpath:db/changelog/databaseChangeLog-master.xml
 
