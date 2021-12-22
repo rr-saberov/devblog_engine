@@ -7,11 +7,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
 
-    private final StorageProperties storageProperties = new StorageProperties();
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        final String uploadPath = storageProperties.getLocation();
+        final String uploadPath = "upload";
         registry
                 .addResourceHandler(String.format("/%s/**", uploadPath))
                 .addResourceLocations(String.format("file:%s/", uploadPath));
