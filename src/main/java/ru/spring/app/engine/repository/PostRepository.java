@@ -108,16 +108,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT pc FROM PostComments pc WHERE pc.postId = :id")
     List<PostComments> getCommentsForPost(@Param("id") Long id);
 
-    @Query(value = "SELECT CAST ((time) AS VARCHAR(255)) as date, CAST (COUNT(*) AS varchar(255)) as amount_posts " +
+    @Query(value = "SELECT to_char(time, 'YYYY-MM-dd') as date, CAST (COUNT(*) AS varchar(255)) as amount_posts " +
             "FROM posts " +
             "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date " +
             "GROUP BY date " +
             "ORDER BY amount_posts DESC", nativeQuery = true)
     List<Map<String, String>> getPostsCountInYear();
 
-    @Query(value = "SELECT CAST ((time) AS VARCHAR(255)) as date, CAST (COUNT(*) AS varchar(255)) as amount_posts " +
+    @Query(value = "SELECT to_char(time, 'YYYY-MM-dd') as date, CAST (COUNT(*) AS varchar(255)) as amount_posts " +
             "FROM posts " +
-            "WHERE EXTRACT(YEAR from time) = :year  AND moderation_status = 'ACCEPTED' AND time <= current_date " +
+            "WHERE EXTRACT(YEAR from time) = :year AND moderation_status = 'ACCEPTED' AND time <= current_date " +
             "GROUP BY date " +
             "ORDER BY amount_posts DESC", nativeQuery = true)
     List<Map<String, String>> getPostsInYear(@Param("year") Integer year);
