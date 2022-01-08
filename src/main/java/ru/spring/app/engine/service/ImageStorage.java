@@ -48,13 +48,13 @@ public class ImageStorage {
         if (Objects.equals(file.getContentType(), "image/jpeg")) {
             String resourceURI = null;
             RandomString random = new RandomString(4);
-            String path = uploadPath + "/" + random.nextString() + "/" + random.nextString();
+            String path = "/" + random.nextString() + "/" + random.nextString();
             if (!file.isEmpty()) {
-                createDir(path);
+                createDir(uploadPath + path);
                 String fileName = random.nextString() + random.nextString()
                         + "." + FilenameUtils.getExtension(file.getOriginalFilename());
-                Path imagePath = Paths.get(path, fileName);
-                resourceURI = "/upload/" + fileName;
+                Path imagePath = Paths.get(uploadPath + path, fileName);
+                resourceURI = "/upload" + path + "/" + fileName;
                 file.transferTo(imagePath);
                 File imageFile = new File(imagePath.toString());
                 BufferedImage image = ImageIO.read(imageFile);
