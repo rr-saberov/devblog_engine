@@ -38,7 +38,7 @@ import java.time.LocalDate;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Tag(name = "post controller for rest api")
-public class ApiPostController {
+public class PostController {
 
     private final PostService postService;
     private final CommentService commentsService;

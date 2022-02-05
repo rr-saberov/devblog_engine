@@ -24,33 +24,34 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Optional<Post> getPostByText(String text);
 
-    @Query("SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
+    @Query("SELECT p FROM Post p WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_TIMESTAMP " +
             "ORDER BY p.time DESC")
     List<Post> getPosts();
 
     @Query("SELECT p FROM Post p " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_TIMESTAMP " +
             "ORDER BY p.postComments.size DESC")
     Page<Post> getPostsOrderByCommentCount(Pageable pageable);
 
     @Query("SELECT p " +
             "FROM Post p " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_TIMESTAMP " +
             "ORDER BY p.postVotesLikes.size DESC")
     Page<Post> getPostsOrderByLikeCount(Pageable pageable);
 
     @Query("FROM Post p " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_TIMESTAMP " +
             "ORDER BY p.time DESC")
     Page<Post> getPostsOrderByTime(Pageable pageable);
 
     @Query("FROM Post p " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_TIMESTAMP " +
             "ORDER BY p.time")
     Page<Post> getOldPostsOrderByTime(Pageable pageable);
 
     @Query("SELECT p FROM Post p " +
-            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_DATE AND p.text LIKE %:query% " +
+            "WHERE p.isActive = 1 AND p.moderationStatus = 'ACCEPTED' AND p.time <= CURRENT_TIMESTAMP " +
+            "AND p.text LIKE %:query% " +
             "ORDER BY p.time DESC")
     Page<Post> searchInText(@Param("query") String query, Pageable pageable);
 
@@ -110,21 +111,22 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query(value = "SELECT to_char(time, 'YYYY-MM-dd') as date, CAST (COUNT(*) AS varchar(255)) as amount_posts " +
             "FROM posts " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date " +
+            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= CURRENT_TIMESTAMP " +
             "GROUP BY date " +
             "ORDER BY amount_posts DESC", nativeQuery = true)
     List<Map<String, String>> getPostsCountInYear();
 
     @Query(value = "SELECT to_char(time, 'YYYY-MM-dd') as date, CAST (COUNT(*) AS varchar(255)) as amount_posts " +
             "FROM posts " +
-            "WHERE EXTRACT(YEAR from time) = :year AND moderation_status = 'ACCEPTED' AND time <= current_date " +
+            "WHERE EXTRACT(YEAR from time) = :year AND moderation_status = 'ACCEPTED' AND time <= CURRENT_TIMESTAMP " +
             "GROUP BY date " +
             "ORDER BY amount_posts DESC", nativeQuery = true)
     List<Map<String, String>> getPostsInYear(@Param("year") Integer year);
 
 
     @Query(value = "SELECT CAST (date_part('year', time) AS INTEGER) as year FROM posts " +
-            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= current_date GROUP BY year ORDER BY year",
+            "WHERE is_active = 1 AND moderation_status = 'ACCEPTED' AND time <= CURRENT_TIMESTAMP " +
+            "GROUP BY year ORDER BY year",
             nativeQuery = true)
     List<Integer> getYears();
 

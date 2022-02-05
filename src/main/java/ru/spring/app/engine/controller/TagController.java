@@ -13,13 +13,13 @@ import ru.spring.app.engine.service.TagService;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "tag controller")
-public class ApiTagController {
+public class TagController {
 
     private final TagService tagService;
 
     @GetMapping("/api/tag")
     @Operation(summary= "get tags by user response")
-    public ResponseEntity<TagsResponse> tags(@RequestParam String query) {
+    public ResponseEntity<TagsResponse> tags(@RequestParam(required = false) String query) {
         return ResponseEntity.ok(tagService.getTags(query));
     }
 }

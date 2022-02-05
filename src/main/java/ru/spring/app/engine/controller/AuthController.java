@@ -33,7 +33,7 @@ import java.security.Principal;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Tag(name = "auth controller")
-public class ApiAuthController {
+public class AuthController {
 
     private final AuthService authService;
     private final CaptchaService captchaService;

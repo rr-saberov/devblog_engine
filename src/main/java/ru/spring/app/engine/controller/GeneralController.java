@@ -35,7 +35,7 @@ import java.security.Principal;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Tag(name = "api general controller")
-public class ApiGeneralController {
+public class GeneralController {
 
     private final SettingsService settingsService;
     private final PostService postService;
