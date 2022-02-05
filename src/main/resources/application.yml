@@ -1,6 +1,4 @@
 spring:
-  main:
-    allow-bean-definition-overriding: true
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/blog_engine?&useSSL=false&serverTimezone=UTC
@@ -28,7 +26,11 @@ spring:
             enable: true
 liquibase:
   change-log: classpath:db/changelog/databaseChangeLog-master.xml
-
+cloudinary:
+  config:
+    cloud-name:
+    api-key:
+    api-secret:
 
 blog:
   title: DevPub

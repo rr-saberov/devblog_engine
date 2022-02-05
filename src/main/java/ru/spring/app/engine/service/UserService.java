@@ -40,7 +40,7 @@ public class UserService {
             userRepository.updateUserPassword(passwordEncoder.encode(request.getPassword()), currentUser.getId());
             response.setResult(true);
         } else if (errors.isEmpty() && file != null){
-            userRepository.updateUserImage(imageStorage.uploadUserPhoto(file), currentUser.getId());
+            userRepository.updateUserImage(imageStorage.uploadImageFile(file), currentUser.getId());
             response.setResult(true);
         } else {
             response.setErrors(errors);
