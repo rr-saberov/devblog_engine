@@ -46,4 +46,3 @@ jar {
         attributes 'Main-Class': 'ru.spring.app.engine.EngineApplication'
     }
 }
-
