@@ -6,7 +6,8 @@ plugins {
 
 group = 'ru.spring.app.engine'
 version = '1.0'
-sourceCompatibility = '16'
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
