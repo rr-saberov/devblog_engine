@@ -20,9 +20,9 @@ public class CaptchaService {
 
     public CaptchaResponse generateCaptcha() {
         restoreOldCaptcha();
-        Cage cage = new GCage();
-        String token = cage.getTokenGenerator().next();
-        String secretCode = new RandomString(12).nextString();
+        var cage = new GCage();
+        var token = cage.getTokenGenerator().next();
+        var secretCode = new RandomString(12).nextString();
         captchaRepository.save(new Captcha(LocalDateTime.now(), token, secretCode));
         byte[] fileContent = cage.draw(token);
         String encodedString = "data:image/png;base64, " + Base64.getEncoder().encodeToString(fileContent);

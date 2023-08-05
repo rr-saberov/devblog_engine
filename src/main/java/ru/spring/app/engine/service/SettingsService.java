@@ -17,7 +17,7 @@ public class SettingsService {
     private final GlobalSettingsRepository settingsRepository;
 
     public SettingsResponse getGlobalSettings() {
-        SettingsResponse settingsResponse = new SettingsResponse();
+        var settingsResponse = new SettingsResponse();
         Map<String, Boolean> map = settingsRepository.findAll().stream()
                 .collect(Collectors.toMap(GlobalSettings::getCode, settings -> settings.getValue().equals("YES")));
         settingsResponse.setMultiuserMode(map.get("MULTIUSER_MODE"));

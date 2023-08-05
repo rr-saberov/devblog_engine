@@ -26,8 +26,8 @@ public class UserService {
     @SneakyThrows
     public EditProfileResponse editProfile(String name, String email, String password, Integer removePhoto,
                                            MultipartFile file, Principal principal) {
+        var response = new EditProfileResponse();
         EditProfileRequest request = createEditProfileRequest(name, email, password, removePhoto);
-        EditProfileResponse response = new EditProfileResponse();
         List<EditProfileError> errors = getErrors(request, file, principal);
         User currentUser = userRepository.findByEmail(principal.getName()).get();
         if (errors.isEmpty() && !currentUser.getEmail().equals(request.getEmail())) {
@@ -50,7 +50,7 @@ public class UserService {
     }
 
     private EditProfileRequest createEditProfileRequest(String name, String email, String password, Integer removePhoto) {
-        EditProfileRequest request = new EditProfileRequest();
+        var request = new EditProfileRequest();
         request.setName(name);
         request.setEmail(email);
         request.setPassword(password);
@@ -62,19 +62,19 @@ public class UserService {
         List<EditProfileError> errors = new ArrayList<>();
         if (!request.getEmail().isEmpty() && !principal.getName().equals(request.getEmail()) &&
                 userRepository.findByEmail(request.getEmail()).isPresent()) {
-            EditProfileError error = new EditProfileError();
+            var error = new EditProfileError();
             error.setEmail("you sent an incorrect email");
             errors.add(error);
         } else if (request.getName().isEmpty()) {
-            EditProfileError error = new EditProfileError();
+            var error = new EditProfileError();
             error.setName("you sent incorrect name");
             errors.add(error);
         } else if (request.getPassword() != null && request.getPassword().length() < 6) {
-            EditProfileError error = new EditProfileError();
+            var error = new EditProfileError();
             error.setPassword("you sent incorrect password");
             errors.add(error);
         } else if (!file.isEmpty() && file.getSize() > Math.pow(10, 6) * 5) {
-            EditProfileError error = new EditProfileError();
+            var error = new EditProfileError();
             error.setPhoto("file size is too big or file is empty");
             errors.add(error);
         }

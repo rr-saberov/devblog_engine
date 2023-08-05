@@ -26,11 +26,11 @@ spring:
           auth: true
           ssl:
             enable: true
-cloudinary:
-  config:
-    cloud-name: ${HEROKU_CLOUD_NAME}
-    api-key: ${HEROKU_KEY}
-    api-secret: ${HEROKU_SECRET}
+#cloudinary:
+#  config:
+#    cloud-name: ${HEROKU_CLOUD_NAME}
+#    api-key: ${HEROKU_KEY}
+#    api-secret: ${HEROKU_SECRET}
 
 blog:
   title: DevPub

@@ -39,8 +39,8 @@ public class ImageStorage {
     }
 
     private File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
-        File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+        var file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        try (var outputStream = new FileOutputStream(file)) {
             outputStream.write(multipartFile.getBytes());
         }
         return file;

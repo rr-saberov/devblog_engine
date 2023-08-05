@@ -33,7 +33,7 @@ public class CommentService {
             return createResponseWithErrors(comment, errors);
         }
         commentsRepository.save(convertRequestToPostComments(comment, email));
-        AddCommentResponse response = new AddCommentResponse();
+        var response = new AddCommentResponse();
         response.setId(new Random().nextLong());
         response.setResult(true);
         return response;
@@ -54,7 +54,7 @@ public class CommentService {
     }
 
     private PostComments convertRequestToPostComments(CommentRequest comment, String email) {
-        PostComments postComments = new PostComments();
+        var postComments = new PostComments();
         LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()),
                 ZoneId.of("UTC").normalized());
         postComments.setParentId(comment.getParentId());
@@ -66,7 +66,7 @@ public class CommentService {
     }
 
     private AddCommentResponse createResponseWithErrors(CommentRequest commentRequest, List<AddCommentError> errors) {
-        AddCommentResponse response = new AddCommentResponse();
+        var response = new AddCommentResponse();
         response.setResult(false);
         response.setErrors(errors);
         return response;

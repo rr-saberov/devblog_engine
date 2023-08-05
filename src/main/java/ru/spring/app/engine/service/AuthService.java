@@ -44,7 +44,6 @@ public class AuthService {
     private final EmailService emailService;
     private final CaptchaService captchaService;
 
-
     public AuthResponse login(LoginRequest loginRequest) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
@@ -63,7 +62,7 @@ public class AuthService {
         }
 
         if (getErrors(request).isEmpty()) {
-            ru.spring.app.engine.entity.User user = new ru.spring.app.engine.entity.User();
+            var user = new ru.spring.app.engine.entity.User();
             user.setEmail(request.getEmail());
             user.setIsModerator(-1);
             user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -78,7 +77,7 @@ public class AuthService {
     }
 
     public ChangePasswordResponse changePassword(ChangePasswordRequest request) throws CaptchaNotFoundException {
-        ChangePasswordResponse response = new ChangePasswordResponse();
+        var response = new ChangePasswordResponse();
         List<ChangePasswordError> errors = changePasswordErrors(request);
         ru.spring.app.engine.entity.User currentUser = userRepository.findByCode(request.getCode());
         if (errors.isEmpty() && captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
@@ -94,7 +93,7 @@ public class AuthService {
     }
 
     public Boolean restore(RestoreRequest request) {
-        RandomString randomString = new RandomString(20);
+        var randomString = new RandomString(20);
         String secret = randomString.nextString();
         String message = "https://localhost:8080/login/change-password/" + secret;
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -109,22 +108,22 @@ public class AuthService {
     private List<RegistrationProfileError> getErrors(RegistrationRequest request) {
         List<RegistrationProfileError> errors = new ArrayList<>();
         if (!captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
-            RegistrationProfileError error = new RegistrationProfileError();
+            var error = new RegistrationProfileError();
             error.setCaptcha("incorrect captcha entered ");
             errors.add(error);
         }
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            RegistrationProfileError error = new RegistrationProfileError();
+            var error = new RegistrationProfileError();
             error.setEmail("This email is already registered");
             errors.add(error);
         }
         if (request.getName().length() < 4 || request.getName().length() > 25) {
-            RegistrationProfileError error = new RegistrationProfileError();
+            var error = new RegistrationProfileError();
             error.setName("Name is incorrect");
             errors.add(error);
         }
         if (request.getPassword().length() < 6) {
-            RegistrationProfileError error = new RegistrationProfileError();
+            var error = new RegistrationProfileError();
             error.setPassword("Length of the password is less than 6 characters");
             errors.add(error);
         }
@@ -137,17 +136,17 @@ public class AuthService {
                 .findBySecretCode(request.getCaptchaSecret()).orElseThrow(() ->
                         new CaptchaNotFoundException(request.getCaptchaSecret()));
         if (request.getPassword().length() < 6) {
-            ChangePasswordError error = new ChangePasswordError();
+            var error = new ChangePasswordError();
             error.setPassword("password must be at least 6 characters");
             errors.add(error);
         }
         if (!captcha.getSecretCode().equals(request.getCaptchaSecret())) {
-            ChangePasswordError error = new ChangePasswordError();
+            var error = new ChangePasswordError();
             error.setCaptcha("invalid captcha");
             errors.add(error);
         }
         if (!request.getCode().equals(userRepository.findByCode(request.getCode()).getCode())) {
-            ChangePasswordError error = new ChangePasswordError();
+            var error = new ChangePasswordError();
             error.setCode("invalid restore code");
             errors.add(error);
         }
@@ -157,13 +156,13 @@ public class AuthService {
     private AuthResponse convertToResponse(String email) {
         ru.spring.app.engine.entity.User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email));
-        AuthUserResponse userResponse = new AuthUserResponse();
+        var userResponse = new AuthUserResponse();
         userResponse.setEmail(currentUser.getEmail());
         userResponse.setName(currentUser.getName());
         userResponse.setPhoto(currentUser.getPhoto());
         userResponse.setModeration(currentUser.getIsModerator() == 1);
         userResponse.setId(currentUser.getId());
-        AuthResponse authResponse = new AuthResponse();
+        var authResponse = new AuthResponse();
         authResponse.setResult(true);
         authResponse.setAuthUserResponse(userResponse);
         return authResponse;

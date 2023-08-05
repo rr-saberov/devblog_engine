@@ -12,7 +12,7 @@ public class EmailService {
     private final JavaMailSender emailSender;
 
     public void sendEmail(String address, String subject, String message) {
-        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        var simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setFrom("ruspro100@yandex.ru");
         simpleMailMessage.setTo(address);
         simpleMailMessage.setSubject(subject);

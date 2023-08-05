@@ -47,11 +47,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -65,6 +61,7 @@ public class PostService {
     private final PostVotesRepository postVotesRepository;
     private final Tag2PostRepository tag2PostRepository;
     private final SettingsService settingsService;
+//    private final ValidationService validationService;
 
     public PostsResponse getPosts(Integer offset, Integer limit, String mode) {
         Pageable nextPage = PageRequest.of(offset / limit, limit);
@@ -99,8 +96,8 @@ public class PostService {
     }
 
     public PostsResponse getPostsByUserRequest(Integer offset, Integer limit, String query) {
+        var postsResponse = new PostsResponse();
         Pageable nextPage = PageRequest.of(offset / limit, limit);
-        PostsResponse postsResponse = new PostsResponse();
         Page<Post> postsPage = postRepository.searchInText(query, nextPage);
         postsResponse.setCount(postsPage.getTotalElements());
         postsResponse.setPosts(postsPage.get().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
@@ -108,8 +105,8 @@ public class PostService {
     }
 
     public PostsResponse getPostsOnDay(Integer offset, Integer limit, LocalDate date) {
+        var postsResponse = new PostsResponse();
         Pageable nextPage = PageRequest.of(offset / limit, limit);
-        PostsResponse postsResponse = new PostsResponse();
         List<Post> posts = postRepository.getPosts().stream()
                 .filter(p -> p.getTime().getYear() == date.getYear()
                         && p.getTime().getMonthValue() == date.getMonthValue()
@@ -121,8 +118,8 @@ public class PostService {
     }
 
     public PostsResponse getPostsByTag(Integer offset, Integer limit, String tag) {
+        var postsResponse = new PostsResponse();
         Pageable nextPage = PageRequest.of(offset / limit, limit);
-        PostsResponse postsResponse = new PostsResponse();
         Page<Post> postsPage = postRepository.getPostsWithTag(tag, nextPage);
         postsResponse.setCount(postsPage.getTotalElements());
         postsResponse.setPosts(postsPage.get().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
@@ -143,7 +140,7 @@ public class PostService {
     }
 
     public AddPostResponse addNewPost(AddPostRequest request, Principal principal) throws AddPostFailException {
-        AddPostResponse response = new AddPostResponse();
+        var response = new AddPostResponse();
         Long userId = userRepository.getUserIdByEmail(principal.getName());
         if (addPostErrors(request).isEmpty()) {
             response.setResult(true);
@@ -156,7 +153,7 @@ public class PostService {
     }
 
     public AddPostResponse updatePost(long id, AddPostRequest request) {
-        AddPostResponse response = new AddPostResponse();
+        var response = new AddPostResponse();
         if (addPostErrors(request).isEmpty()) {
             response.setResult(true);
             editPostFromRequest(id, request);
@@ -171,7 +168,7 @@ public class PostService {
         if (!statisticIsPublicAndUserRoleModerator(email)) {
             throw new AccessIsDeniedException("access to statistic is denied");
         }
-        StatisticsResponse response = new StatisticsResponse();
+        var response = new StatisticsResponse();
         response.setPostsCount(postRepository.findAll().size());
         response.setViewCount(postRepository.getTotalViewCount());
         response.setLikesCount(postRepository.getTotalLikesCount());
@@ -182,7 +179,7 @@ public class PostService {
     }
 
     public StatisticsResponse getUserStatistics(String email) {
-        StatisticsResponse response = new StatisticsResponse();
+        var response = new StatisticsResponse();
         User currentUser = userRepository.findByEmail(email).get();
         response.setPostsCount(postRepository.findAll().stream()
                 .filter(post -> post.getUserId() == currentUser.getId()).count());
@@ -248,12 +245,12 @@ public class PostService {
 
     private List<AddPostError> addPostErrors(AddPostRequest request) {
         List<AddPostError> errors = new ArrayList<>();
-        if (request.getTitle().isEmpty() || request.getTitle().length() < 3) {
-            AddPostError titleError = new AddPostError();
+        if (request.title().isEmpty() || request.title().length() < 3) {
+            var titleError = new AddPostError();
             titleError.setTitle("No title set");
             errors.add(titleError);
-        } else if (request.getText().isEmpty() || request.getText().length() < 50) {
-            AddPostError textError = new AddPostError();
+        } else if (request.text().isEmpty() || request.text().length() < 50) {
+            var textError = new AddPostError();
             textError.setText("The text is too short ");
             errors.add(textError);
         }
@@ -261,16 +258,16 @@ public class PostService {
     }
 
     private PostsResponse convertPagePostsToResponse(Page<Post> posts) {
-        PostsResponse postsResponse = new PostsResponse();
+        var postsResponse = new PostsResponse();
         postsResponse.setCount(posts.getTotalElements());
         postsResponse.setPosts(posts.stream().map(this::convertPostToSingleResponse).collect(Collectors.toList()));
         return postsResponse;
     }
 
     private SinglePostResponse convertPostToSingleResponse(Post post) {
-        SinglePostResponse postResponse = new SinglePostResponse();
-        UserResponse userResponse = new UserResponse();
-        Timestamp timestamp = new Timestamp(post.getTime().toEpochSecond(ZoneOffset.UTC));
+        var postResponse = new SinglePostResponse();
+        var userResponse = new UserResponse();
+        var timestamp = new Timestamp(post.getTime().toEpochSecond(ZoneOffset.UTC));
         userResponse.setId(post.getUserId());
         userResponse.setName(postRepository.getNameFromPost(post.getUserId()));
         postResponse.setId(post.getId());
@@ -289,7 +286,7 @@ public class PostService {
     }
 
     private String createAnnounce(String text) {
-        StringBuilder builder = new StringBuilder();
+        var builder = new StringBuilder();
         String[] words = text.split(" ").length > 10 ?
                 text.split(" ") : (String[]) List.of(text.substring(0, 10)).toArray();
         for (int i = 0; i < 10; i++) {
@@ -300,8 +297,8 @@ public class PostService {
     }
 
     private CurrentPostResponse convertPostToCurrentPostResponse(Post post) {
-        CurrentPostResponse postResponse = new CurrentPostResponse();
-        CommentUserResponse userResponse = new CommentUserResponse();
+        var postResponse = new CurrentPostResponse();
+        var userResponse = new CommentUserResponse();
         String[] tags = new String[post.getTags().size()];
         List<String> tagNameList = post.getTags().stream().map(Tag::getName).collect(Collectors.toList());
         tags = tagNameList.toArray(tags);
@@ -327,7 +324,7 @@ public class PostService {
         List<CommentResponse> responses = new ArrayList<>();
         for (PostComments pc : postRepository.getCommentsForPost(postId)) {
             User currentUser = userRepository.getUsersById(pc.getUserId());
-            CommentResponse commentResponse = new CommentResponse();
+            var commentResponse = new CommentResponse();
             commentResponse.setId(pc.getId());
             commentResponse.setText(pc.getText());
             commentResponse.setTimestamp(pc.getTime().toEpochSecond(ZoneOffset.UTC));
@@ -342,7 +339,7 @@ public class PostService {
 
     private CalendarResponse convertMapToResponse() {
         Map<String, Long> calendarMap = new HashMap<>();
-        CalendarResponse calendarResponse = new CalendarResponse();
+        var calendarResponse = new CalendarResponse();
         postRepository.getPostsCountInYear().forEach(el ->
                 calendarMap.put(el.get("date"), Long.parseLong(el.get("amount_posts"))));
         calendarResponse.setYears(postRepository.getYears());
@@ -352,7 +349,7 @@ public class PostService {
 
     private CalendarResponse convertMapToResponse(Integer year) {
         Map<String, Long> calendarMap = new HashMap<>();
-        CalendarResponse calendarResponse = new CalendarResponse();
+        var calendarResponse = new CalendarResponse();
         postRepository.getPostsInYear(year).forEach(el ->
                 calendarMap.put(el.get("date"), Long.parseLong(el.get("amount_posts"))));
         calendarResponse.setYears(postRepository.getYears());
@@ -362,9 +359,9 @@ public class PostService {
 
     private void savePostFromRequest(AddPostRequest request, Long userId) throws AddPostFailException {
         LocalDateTime time = setDateToPost(request);
-        if (postRepository.getPostByText(request.getText()).isEmpty()) {
-            postRepository.savePost(request.getIsActive(), request.getTitle(), request.getText(), time, userId);
-            saveTagsForPost(request, postRepository.getPostByText(request.getText()).get().getId());
+        if (postRepository.getPostByText(request.text()).isEmpty()) {
+            postRepository.savePost(request.isActive(), request.title(), request.text(), time, userId);
+            saveTagsForPost(request, postRepository.getPostByText(request.text()).get().getId());
         } else {
             throw new AddPostFailException("similar post already exists");
         }
@@ -372,12 +369,12 @@ public class PostService {
 
     private void editPostFromRequest(long id, AddPostRequest request) {
         LocalDateTime time = setDateToPost(request);
-        postRepository.updatePost(request.getIsActive(), request.getTitle(), request.getText(), time, id);
-        saveTagsForPost(request, postRepository.getPostByText(request.getText()).get().getId());
+        postRepository.updatePost(request.isActive(), request.title(), request.text(), time, id);
+        saveTagsForPost(request, postRepository.getPostByText(request.text()).get().getId());
     }
 
     private void saveTagsForPost(AddPostRequest request, Long postId) {
-        List<String> requestTags = request.getTags();
+        List<String> requestTags = request.tags();
         for (String t : requestTags) {
             if (tagRepository.getTagByName(t).isEmpty()) {
                 tagRepository.save(new Tag(null, t));
@@ -389,8 +386,8 @@ public class PostService {
 
     private LocalDateTime setDateToPost(AddPostRequest request) {
         return LocalDateTime.now()
-                .isAfter(LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getTimestamp()), ZoneId.systemDefault())) ?
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(request.getTimestamp() * 1000), ZoneId.systemDefault()) :
+                .isAfter(LocalDateTime.ofInstant(Instant.ofEpochMilli(request.timestamp()), ZoneId.systemDefault())) ?
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(request.timestamp() * 1000), ZoneId.systemDefault()) :
                 LocalDateTime.now();
     }
 }
