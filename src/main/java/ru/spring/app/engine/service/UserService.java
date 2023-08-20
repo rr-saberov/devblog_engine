@@ -30,14 +30,14 @@ public class UserService {
         EditProfileRequest request = createEditProfileRequest(name, email, password, removePhoto);
         List<EditProfileError> errors = getErrors(request, file, principal);
         User currentUser = userRepository.findByEmail(principal.getName()).get();
-        if (errors.isEmpty() && !currentUser.getEmail().equals(request.getEmail())) {
-            userRepository.updateUserEmail(request.getEmail(), currentUser.getId());
+        if (errors.isEmpty() && !currentUser.getEmail().equals(request.email())) {
+            userRepository.updateUserEmail(request.email(), currentUser.getId());
             response.setResult(true);
-        } else if (errors.isEmpty() && !currentUser.getName().equals(request.getName())) {
-            userRepository.updateUserName(request.getName(), currentUser.getId());
+        } else if (errors.isEmpty() && !currentUser.getName().equals(request.name())) {
+            userRepository.updateUserName(request.name(), currentUser.getId());
             response.setResult(true);
-        } else if (errors.isEmpty() && request.getPassword() != null) {
-            userRepository.updateUserPassword(passwordEncoder.encode(request.getPassword()), currentUser.getId());
+        } else if (errors.isEmpty() && request.password() != null) {
+            userRepository.updateUserPassword(passwordEncoder.encode(request.password()), currentUser.getId());
             response.setResult(true);
         } else if (errors.isEmpty() && file != null){
             userRepository.updateUserImage(imageStorage.uploadImageFile(file), currentUser.getId());
@@ -50,26 +50,21 @@ public class UserService {
     }
 
     private EditProfileRequest createEditProfileRequest(String name, String email, String password, Integer removePhoto) {
-        var request = new EditProfileRequest();
-        request.setName(name);
-        request.setEmail(email);
-        request.setPassword(password);
-        request.setRemovePhoto(removePhoto);
-        return request;
+        return new EditProfileRequest(name, email, password, removePhoto);
     }
 
     private List<EditProfileError> getErrors(EditProfileRequest request, MultipartFile file, Principal principal) {
         List<EditProfileError> errors = new ArrayList<>();
-        if (!request.getEmail().isEmpty() && !principal.getName().equals(request.getEmail()) &&
-                userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (!request.email().isEmpty() && !principal.getName().equals(request.email()) &&
+                userRepository.findByEmail(request.email()).isPresent()) {
             var error = new EditProfileError();
             error.setEmail("you sent an incorrect email");
             errors.add(error);
-        } else if (request.getName().isEmpty()) {
+        } else if (request.name().isEmpty()) {
             var error = new EditProfileError();
             error.setName("you sent incorrect name");
             errors.add(error);
-        } else if (request.getPassword() != null && request.getPassword().length() < 6) {
+        } else if (request.password() != null && request.password().length() < 6) {
             var error = new EditProfileError();
             error.setPassword("you sent incorrect password");
             errors.add(error);

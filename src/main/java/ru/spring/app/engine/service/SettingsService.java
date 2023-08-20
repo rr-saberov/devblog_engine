@@ -27,9 +27,9 @@ public class SettingsService {
     }
 
     public Boolean updateGlobalSettings(SettingsRequest request) {
-        updateMultiuserMode(request.isMultiuserMode());
-        updatePostPremoderation(request.isPostPremoderation());
-        updateStatisticIsPublic(request.isStatisticsIsPublic());
+        updateMultiuserMode(request.multiuserMode());
+        updatePostPremoderation(request.postPremoderation());
+        updateStatisticIsPublic(request.statisticsIsPublic());
         return true;
     }
 

@@ -6,10 +6,9 @@ spring:
     url: jdbc:${DATABASE_URL:postgresql://localhost:5432/blog_engine?&useSSL=false&serverTimezone=UTC}
     username: postgres
     password: postgres
-    initialization-mode: always
   liquibase:
     change-log: classpath:db/changelog/databaseChangeLog-master.xml
-    enabled: false
+    enabled: true
   jpa:
     hibernate:
       ddl-auto: none
@@ -26,12 +25,14 @@ spring:
           auth: true
           ssl:
             enable: true
+  sql:
+    init:
+      mode: always
 #cloudinary:
 #  config:
 #    cloud-name: ${HEROKU_CLOUD_NAME}
 #    api-key: ${HEROKU_KEY}
 #    api-secret: ${HEROKU_SECRET}
-
 blog:
   title: DevPub
   subtitle: Рассказы разработчиков

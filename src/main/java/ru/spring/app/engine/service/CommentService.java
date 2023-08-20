@@ -41,13 +41,13 @@ public class CommentService {
 
     private List<AddCommentError> addErrorsToList(CommentRequest comment) throws AddCommentFailException {
         List<AddCommentError> errors = new ArrayList<>();
-        if (comment.getPostId() == 0 && commentsRepository.findById(comment.getParentId()).isEmpty()) {
+        if (comment.postId() == 0 && commentsRepository.findById(comment.parentId()).isEmpty()) {
             throw new AddCommentFailException("no comment with such id");
         }
-        if (postRepository.findById(comment.getPostId()).isEmpty()) {
+        if (postRepository.findById(comment.postId()).isEmpty()) {
             throw new AddCommentFailException("no post with such id");
         }
-        if (comment.getText().length() <= 10) {
+        if (comment.text().length() <= 10) {
             errors.add(new AddCommentError("add fail, the text is too short"));
         }
         return errors;
@@ -57,9 +57,9 @@ public class CommentService {
         var postComments = new PostComments();
         LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()),
                 ZoneId.of("UTC").normalized());
-        postComments.setParentId(comment.getParentId());
-        postComments.setPostId(comment.getPostId());
-        postComments.setText(comment.getText());
+        postComments.setParentId(comment.parentId());
+        postComments.setPostId(comment.postId());
+        postComments.setText(comment.text());
         postComments.setTime(time);
         postComments.setUserId(userRepository.getUserIdByEmail(email));
         return postComments;

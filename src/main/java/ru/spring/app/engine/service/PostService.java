@@ -193,11 +193,11 @@ public class PostService {
 
     public OkResult addLike(VoteRequest request, String email) {
         Optional<User> currentUser = userRepository.findByEmail(email);
-        if (currentUser.isPresent() && isPostHasUserDislike(request.getPostId(), currentUser.get().getId())) {
-            postVotesRepository.changeDislikeToLike(currentUser.get().getId(), request.getPostId());
+        if (currentUser.isPresent() && isPostHasUserDislike(request.postId(), currentUser.get().getId())) {
+            postVotesRepository.changeDislikeToLike(currentUser.get().getId(), request.postId());
             return new OkResult(ResultStatus.TRUE);
-        } else if (currentUser.isPresent() && !isPostHasUserLike(request.getPostId(), currentUser.get().getId())) {
-            postVotesRepository.addLike(request.getPostId(), LocalDate.now(), currentUser.get().getId());
+        } else if (currentUser.isPresent() && !isPostHasUserLike(request.postId(), currentUser.get().getId())) {
+            postVotesRepository.addLike(request.postId(), LocalDate.now(), currentUser.get().getId());
             return new OkResult(ResultStatus.TRUE);
         } else {
             return new OkResult(ResultStatus.FALSE);
@@ -206,11 +206,11 @@ public class PostService {
 
     public OkResult addDislike(VoteRequest request, String email) {
         Optional<User> currentUser = userRepository.findByEmail(email);
-        if (currentUser.isPresent() && isPostHasUserLike(request.getPostId(), currentUser.get().getId())) {
+        if (currentUser.isPresent() && isPostHasUserLike(request.postId(), currentUser.get().getId())) {
             postVotesRepository.changeLikeToDislike(currentUser.get().getId());
             return new OkResult(ResultStatus.TRUE);
-        } else if (currentUser.isPresent() && !isPostHasUserDislike(request.getPostId(), currentUser.get().getId())) {
-            postVotesRepository.addDislike(request.getPostId(), LocalDate.now(), currentUser.get().getId());
+        } else if (currentUser.isPresent() && !isPostHasUserDislike(request.postId(), currentUser.get().getId())) {
+            postVotesRepository.addDislike(request.postId(), LocalDate.now(), currentUser.get().getId());
             return new OkResult(ResultStatus.TRUE);
         } else {
             return new OkResult(ResultStatus.FALSE);
@@ -218,11 +218,11 @@ public class PostService {
     }
 
     public Boolean moderatePost(ModerationRequest request) {
-        if (request.getDecision().equals("accept")) {
-            postRepository.updatePostStatus(ModerationStatus.ACCEPTED.name(), request.getPostId());
+        if (request.decision().equals("accept")) {
+            postRepository.updatePostStatus(ModerationStatus.ACCEPTED.name(), request.postId());
             return true;
-        } else if (request.getDecision().equals("decline")) {
-            postRepository.updatePostStatus(ModerationStatus.DECLINED.name(), request.getPostId());
+        } else if (request.decision().equals("decline")) {
+            postRepository.updatePostStatus(ModerationStatus.DECLINED.name(), request.postId());
             return true;
         }
         return false;

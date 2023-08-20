@@ -46,7 +46,7 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest loginRequest) {
         Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
             SecurityContextHolder.getContext().setAuthentication(auth);
             User user = (User) auth.getPrincipal();
             return convertToResponse(user.getUsername());
@@ -63,10 +63,10 @@ public class AuthService {
 
         if (getErrors(request).isEmpty()) {
             var user = new ru.spring.app.engine.entity.User();
-            user.setEmail(request.getEmail());
+            user.setEmail(request.email());
             user.setIsModerator(-1);
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setName(request.getName());
+            user.setPassword(passwordEncoder.encode(request.password()));
+            user.setName(request.name());
             user.setRegTime(new Date(System.currentTimeMillis()));
             userRepository.save(user);
             return new RegistrationResponse(true);
@@ -79,11 +79,11 @@ public class AuthService {
     public ChangePasswordResponse changePassword(ChangePasswordRequest request) throws CaptchaNotFoundException {
         var response = new ChangePasswordResponse();
         List<ChangePasswordError> errors = changePasswordErrors(request);
-        ru.spring.app.engine.entity.User currentUser = userRepository.findByCode(request.getCode());
-        if (errors.isEmpty() && captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
-            userRepository.updateUserPassword(passwordEncoder.encode(request.getPassword()), currentUser.getId());
+        ru.spring.app.engine.entity.User currentUser = userRepository.findByCode(request.code());
+        if (errors.isEmpty() && captchaService.validCaptcha(request.captchaSecret(), request.captcha())) {
+            userRepository.updateUserPassword(passwordEncoder.encode(request.password()), currentUser.getId());
             response.setResult(true);
-        } else if (captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
+        } else if (captchaService.validCaptcha(request.captchaSecret(), request.captcha())) {
             response.setResult(false);
             response.setErrors(errors);
         } else {
@@ -96,9 +96,9 @@ public class AuthService {
         var randomString = new RandomString(20);
         String secret = randomString.nextString();
         String message = "https://localhost:8080/login/change-password/" + secret;
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            userRepository.updateUserCode(secret, request.getEmail());
-            emailService.sendEmail(request.getEmail(), "subject", message);
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            userRepository.updateUserCode(secret, request.email());
+            emailService.sendEmail(request.email(), "subject", message);
             return true;
         } else {
             return false;
@@ -107,22 +107,22 @@ public class AuthService {
 
     private List<RegistrationProfileError> getErrors(RegistrationRequest request) {
         List<RegistrationProfileError> errors = new ArrayList<>();
-        if (!captchaService.validCaptcha(request.getCaptchaSecret(), request.getCaptcha())) {
+        if (!captchaService.validCaptcha(request.captchaSecret(), request.captcha())) {
             var error = new RegistrationProfileError();
             error.setCaptcha("incorrect captcha entered ");
             errors.add(error);
         }
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(request.email()).isPresent()) {
             var error = new RegistrationProfileError();
             error.setEmail("This email is already registered");
             errors.add(error);
         }
-        if (request.getName().length() < 4 || request.getName().length() > 25) {
+        if (request.name().length() < 4 || request.name().length() > 25) {
             var error = new RegistrationProfileError();
             error.setName("Name is incorrect");
             errors.add(error);
         }
-        if (request.getPassword().length() < 6) {
+        if (request.password().length() < 6) {
             var error = new RegistrationProfileError();
             error.setPassword("Length of the password is less than 6 characters");
             errors.add(error);
@@ -133,19 +133,19 @@ public class AuthService {
     private List<ChangePasswordError> changePasswordErrors(ChangePasswordRequest request) throws CaptchaNotFoundException {
         List<ChangePasswordError> errors = new ArrayList<>();
         Captcha captcha = captchaRepository
-                .findBySecretCode(request.getCaptchaSecret()).orElseThrow(() ->
-                        new CaptchaNotFoundException(request.getCaptchaSecret()));
-        if (request.getPassword().length() < 6) {
+                .findBySecretCode(request.captchaSecret()).orElseThrow(() ->
+                        new CaptchaNotFoundException(request.captchaSecret()));
+        if (request.password().length() < 6) {
             var error = new ChangePasswordError();
             error.setPassword("password must be at least 6 characters");
             errors.add(error);
         }
-        if (!captcha.getSecretCode().equals(request.getCaptchaSecret())) {
+        if (!captcha.getSecretCode().equals(request.captchaSecret())) {
             var error = new ChangePasswordError();
             error.setCaptcha("invalid captcha");
             errors.add(error);
         }
-        if (!request.getCode().equals(userRepository.findByCode(request.getCode()).getCode())) {
+        if (!request.code().equals(userRepository.findByCode(request.code()).getCode())) {
             var error = new ChangePasswordError();
             error.setCode("invalid restore code");
             errors.add(error);

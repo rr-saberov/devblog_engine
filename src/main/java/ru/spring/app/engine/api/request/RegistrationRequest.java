@@ -1,17 +1,13 @@
 package ru.spring.app.engine.api.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
-@Data
-@AllArgsConstructor
-public class RegistrationRequest {
-    @JsonProperty("e_mail")
-    private String email;
-    private String password;
-    private String name;
-    private String captcha;
-    @JsonProperty("captcha_secret")
-    private String captchaSecret;
-}
+public record RegistrationRequest(
+        @JsonProperty("e_mail")
+        String email,
+        String password,
+        String name,
+        String captcha,
+        @JsonProperty("captcha_secret")
+        String captchaSecret
+) {}

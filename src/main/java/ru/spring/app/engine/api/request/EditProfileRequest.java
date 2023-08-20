@@ -1,14 +1,18 @@
 package ru.spring.app.engine.api.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
 
-@Data
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class EditProfileRequest {
-    private String name;
-    private String email;
-    private String password;
-    private Integer removePhoto;
-    private String photo;
+public record EditProfileRequest (
+        String name,
+        String email,
+        String password,
+        Integer removePhoto,
+        String photo
+) {
+    public EditProfileRequest(String name, String email, String password, Integer removePhoto) {
+        this(name, email, password, removePhoto, null);
+    }
 }
+
