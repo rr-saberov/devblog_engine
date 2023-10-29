@@ -1,6 +1,5 @@
 package ru.spring.app.engine.service;
 
-import com.github.cage.Cage;
 import com.github.cage.GCage;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
@@ -35,9 +34,8 @@ public class CaptchaService {
     }
 
     private void restoreOldCaptcha() {
-        captchaRepository.findAll().forEach(cp -> {
-            if(cp.getTime().isBefore(LocalDateTime.now().plusHours(1)))
-                captchaRepository.delete(cp);
-        });
+        captchaRepository.findAll().stream()
+                .filter(cp -> cp.getTime().isBefore(LocalDateTime.now().plusHours(1)))
+                .forEach(captchaRepository::delete);
     }
 }

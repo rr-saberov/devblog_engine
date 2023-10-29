@@ -1,9 +1,17 @@
-Blog Engine app.
+# Blog Engine App
 
-Start app:
+**To start the app**, follow these steps:
 
-1). Enter your login and password to access the database in application.yaml in src/main/recources
+1. Build the Gradle project using your favorite IDE or by running the following command in the terminal:
 
-2). Open terminal and enter: mvn spring-boot:run
+   ```shell
+   ./gradlew
 
-3). Open page http://localhost:8080/ in your browser
+2. Open your terminal and enter the following command to set up the necessary Docker containers:
+      ```shell 
+        docker-compose up --build
+    ```
+3. Finally, open the following URL in your web browser: 
+    ```plaintext  
+     http://localhost:8080/
+     ```

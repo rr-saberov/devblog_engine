@@ -6,7 +6,6 @@ import ru.spring.app.engine.api.request.CommentRequest;
 import ru.spring.app.engine.api.response.AddCommentResponse;
 import ru.spring.app.engine.api.response.errors.AddCommentError;
 import ru.spring.app.engine.entity.PostComments;
-import ru.spring.app.engine.entity.enums.ModerationStatus;
 import ru.spring.app.engine.exception.AddCommentFailException;
 import ru.spring.app.engine.repository.CommentRepository;
 import ru.spring.app.engine.repository.PostRepository;

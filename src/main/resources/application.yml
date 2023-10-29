@@ -28,11 +28,6 @@ spring:
   sql:
     init:
       mode: always
-#cloudinary:
-#  config:
-#    cloud-name: ${HEROKU_CLOUD_NAME}
-#    api-key: ${HEROKU_KEY}
-#    api-secret: ${HEROKU_SECRET}
 blog:
   title: DevPub
   subtitle: Рассказы разработчиков
